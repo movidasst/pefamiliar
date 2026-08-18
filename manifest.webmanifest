@@ -1,0 +1,19 @@
+{
+  "name": "Plan Familiar de Emergencia | La Movida SST Plus",
+  "short_name": "Plan Familiar",
+  "description": "Construye, revisa y practica un Plan Familiar de Emergencia.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#007b85",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
