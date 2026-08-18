@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://pefamiliar.movidasst.com/sitemap.xml
