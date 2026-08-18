@@ -11,7 +11,7 @@
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <title>Plan Familiar de Emergencia | La Movida SST Plus</title>
   <style>
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#00205b}.loader{text-align:center;padding:28px;max-width:520px}.spinner{width:48px;height:48px;border:4px solid #dbe5ea;border-top-color:#007b85;border-radius:50%;margin:0 auto 18px;animation:spin .8s linear infinite}.loader strong{display:block;font-size:1.05rem}.loader p{margin:8px 0 0;color:#64748b;line-height:1.5;font-size:.9rem}@keyframes spin{to{transform:rotate(360deg)}}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#00205b}.loader{text-align:center;padding:28px;max-width:520px}.spinner{width:48px;height:48px;border:4px solid #dbe5ea;border-top-color:#007b85;border-radius:50%;margin:0 auto 18px;animation:spin .8s linear infinite}.loader strong{display:block;font-size:1.05rem}.loader p{margin:8px 0 0;color:#64748b;line-height:1.5;font-size:.9rem}.error{max-width:620px;padding:32px}.error h1{margin-top:0}.retry{margin-top:16px;border:0;border-radius:14px;background:#007b85;color:#fff;padding:12px 18px;font:inherit;font-weight:800;cursor:pointer}@keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
@@ -22,9 +22,20 @@
   </div>
   <script>
   (async()=>{
+    const rawBase='https://raw.githubusercontent.com/movidasst/pefamiliar/main/payload/';
+    async function loadPart(n){
+      const local=`payload/${n}.txt?v=211`;
+      try{
+        const r=await fetch(local,{cache:'no-store'});
+        if(r.ok)return await r.text();
+      }catch(_){/* usa respaldo */}
+      const rr=await fetch(`${rawBase}${n}.txt`,{cache:'no-store',mode:'cors'});
+      if(!rr.ok)throw new Error(`No se pudo cargar el componente ${n} de la aplicación.`);
+      return rr.text();
+    }
     try{
       if(!('DecompressionStream' in window)) throw new Error('Tu navegador necesita una versión más reciente para abrir esta aplicación.');
-      const parts=await Promise.all([1,2,3,4,5,6].map(n=>fetch(`payload/${n}.txt`).then(r=>{if(!r.ok)throw new Error('No se pudo cargar un componente de la aplicación.');return r.text();})));
+      const parts=await Promise.all([1,2,3,4,5,6].map(loadPart));
       const b64=parts.join('').replace(/\s+/g,'');
       const bin=atob(b64);
       const bytes=new Uint8Array(bin.length);
@@ -33,7 +44,8 @@
       const html=await new Response(stream).text();
       document.open();document.write(html);document.close();
     }catch(e){
-      document.body.innerHTML=`<main style="padding:32px;max-width:620px;margin:auto;font-family:system-ui;color:#00205b"><h1>No se pudo abrir la aplicación</h1><p style="color:#475569;line-height:1.55">${String(e.message||e)}</p><p style="color:#475569;line-height:1.55">Actualiza el navegador y vuelve a cargar la página.</p></main>`;
+      console.error('PEF load error',e);
+      document.body.innerHTML=`<main class="error"><h1>No se pudo abrir la aplicación</h1><p style="color:#475569;line-height:1.55">${String(e.message||e)}</p><p style="color:#475569;line-height:1.55">Comprueba tu conexión y vuelve a intentarlo.</p><button class="retry" onclick="location.reload()">Volver a intentar</button></main>`;
     }
   })();
   </script>
