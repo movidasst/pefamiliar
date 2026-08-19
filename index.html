@@ -39,7 +39,63 @@ body.large-text{--font:1.1rem}body.high-contrast{--bg:#fff;--text:#111827;--mute
 /*__PEF_V4_BOUNDARY_02_5__*/
 /*__PEF_V4_BOUNDARY_02_6__*/
 /*__PEF_V4_BOUNDARY_02_7__*/
-__PEF_V4F_PART_03__
+@media(min-width:720px){.app{padding-left:22px;padding-right:22px}.hero{padding:32px}.hero-grid{grid-template-columns:1.5fr .8fr;align-items:end}.hero-visual{grid-template-columns:repeat(2,1fr)}.grid.two{grid-template-columns:repeat(2,1fr)}.grid.three{grid-template-columns:repeat(3,1fr)}.metrics{grid-template-columns:repeat(4,1fr)}.row{grid-template-columns:repeat(2,1fr)}.chips{grid-template-columns:repeat(3,minmax(0,1fr))}.stage-list{grid-template-columns:repeat(2,1fr)}.stage-card:last-child:nth-child(odd){grid-column:1/-1}.wizard-actions{bottom:88px}.quick{padding-left:max(24px,calc((100vw - 900px)/2));padding-right:max(24px,calc((100vw - 900px)/2))}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+@media print{body{background:#fff;font-family:Arial,sans-serif}.topline,.app,.nav,.quick{display:none!important}.print{display:block!important;padding:8mm;color:#1f2937}.print h1{color:#00205b;font-size:22px}.print h2{color:#007b85;font-size:15px;border-bottom:1px solid #dbe6ea;padding-bottom:4px;margin-top:18px}.print h3{color:#00205b;font-size:12px}.print p,.print li,.print td,.print th{font-size:9px;line-height:1.4}.print table{width:100%;border-collapse:collapse}.print th,.print td{border:1px solid #dbe6ea;padding:5px;text-align:left;vertical-align:top}.print .brand-print{display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid #007b85;padding-bottom:7px}.print .brand-print strong{color:#00205b}.print .quick-page,.print .wallet-page{break-before:page;page-break-before:always}.print .flow-card{border:2px solid #dbe6ea;border-radius:13px;padding:8px;margin:0 0 9px;break-inside:avoid}.print .flow-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.print .flow-step{border:1px solid #dbe6ea;border-radius:9px;padding:5px;font-size:8px}.print .flow-step b{display:block;color:#00205b;font-size:7px;text-transform:uppercase}.print .wallet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7mm}.print .wallet{min-height:88mm;border:2px solid #007b85;border-radius:12px;padding:8mm;break-inside:avoid}.print .wallet h3{font-size:16px;margin:0}.print .wallet .big{font-size:13px;font-weight:bold;color:#00205b}.print .wallet li{font-size:10px;margin-bottom:4px}.print .print-map svg{width:100%;height:auto;max-height:160mm}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido principal</a>
+<div class="topline"></div>
+<div class="app">
+<header class="header" aria-label="Encabezado">
+  <div class="brand">
+    <img class="logo" src="https://lh3.googleusercontent.com/d/1MjVa3JxeKC95xEdlcZ5ZFMCKlatbrU2s=w512" alt="Logo La Movida SST Plus" onerror="this.style.display='none'">
+    <div class="brandcopy"><strong>La Movida SST Plus</strong><span>De la Reacción a la Prevención</span></div>
+  </div>
+  <div class="header-actions">
+    <button class="iconbtn" id="helpBtn" aria-label="Ayuda de esta pantalla"></button>
+    <button class="iconbtn" id="quickBtn" aria-label="Abrir plan rápido"></button>
+  </div>
+</header>
+<main id="main" class="main" tabindex="-1"></main>
+<p class="foot"><strong>Plan Familiar de Emergencia · La Movida SST Plus</strong><br>Herramienta educativa de preparación familiar. Las instrucciones de autoridades y responsables del lugar prevalecen.<br>Elaborado por <strong>David Linares Brea</strong> · info@movidasst.com · WhatsApp +56 9 6861 5650</p>
+</div>
+<nav class="nav" aria-label="Navegación principal">
+<button data-nav="home" aria-label="Inicio"></button>
+<button data-nav="family" aria-label="Familia"></button>
+<button data-nav="plan" aria-label="Mi plan"></button>
+<button data-nav="practice" aria-label="Practicar"></button>
+<button data-nav="more" aria-label="Más"></button>
+</nav>
+<div id="overlay"></div>
+<div id="live" class="sr" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></div>
+<section id="print" class="print"></section>
+<input id="importer" type="file" accept="application/json" hidden>
+<script>
+(()=>{'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
+const VERSION='4.0.0';
+const KEY='pefamiliar_v4_state', OLD_KEYS=['pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
+const DB_NAME='pefamiliar_v4_db', DB_VERSION=1, CATALOG_KEY='pef_catalog_cache_v2';
+const SUPABASE_URL='https://lfdmbkzghnwvsapxypvt.supabase.co', SUPABASE_KEY='sb_publishable_bRnkA6PA8-v073nrw9zxiQ_8rVGiOn1';
+const I={home:'<svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M9 20v-6h6v6"/></svg>',family:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-4 2.5-6 6-6s6 2 6 6"/><path d="M14 15c4-.6 7 1.3 7 5"/></svg>',plan:'<svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M16 3v4h4"/><path d="m8 12 2 2 5-5"/><path d="M8 18h8"/></svg>',practice:'<svg viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"/></svg>',more:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>',help:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 0 1 4.7.8c0 2-2.5 2.2-2.5 4"/><path d="M12 17h.01"/></svg>',quick:'<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 10-13h-7z"/></svg>',back:'←'};
+const FALLBACK={
+ necesidades_apoyo:[['meds','Medicamentos de uso continuo'],['wheelchair','Silla de ruedas'],['walker','Bastón / andador'],['vision','Apoyo por discapacidad visual'],['hearing','Apoyo por discapacidad auditiva'],['cognitive','Apoyo cognitivo / neurodivergencia'],['oxygen','Oxígeno / equipo respiratorio'],['electric','Equipo médico dependiente de electricidad'],['pregnancy','Embarazo'],['child','Niño/a pequeño/a'],['elder','Adulto mayor'],['other','Otra necesidad']],
+ amenazas:[['sismo','Sismo'],['incendio','Incendio'],['inundacion','Inundación'],['deslizamiento','Deslizamiento'],['servicios','Interrupción de servicios'],['tecnologica','Emergencia tecnológica'],['meteorologica','Evento meteorológico'],['otra','Otra amenaza']],
+ vulnerabilidades:[['vivienda_altura','Vivienda en altura'],['salida_unica','Una sola salida'],['movilidad_reducida','Movilidad reducida'],['ninos_pequenos','Niños pequeños'],['adultos_mayores','Adultos mayores'],['medicamentos','Dependencia de medicamentos'],['familia_separada','Familia separada gran parte del día'],['sin_com_alternativa','Sin comunicación alternativa'],['mascotas','Mascotas que requieren planificación'],['otro','Otra vulnerabilidad']],
+ capacidades:[['botiquin','Botiquín'],['extintor','Extintor'],['vehiculo','Medio de transporte'],['radio','Radio'],['linterna','Linterna'],['agua','Agua almacenada'],['pa','Primeros auxilios'],['vecinos','Red vecinal'],['familiar','Familiar cercano'],['comalt','Comunicación alternativa']],
+ relaciones_familiares:['Madre','Padre','Hijo/a','Pareja','Abuelo/a','Hermano/a','Cuidador/a','Otro'],
+ lugares_habituales:['Casa','Trabajo','Escuela / colegio','Universidad / instituto','Guardería','Casa de familiar / cuidador','En ruta / movilidad','Actividad deportiva / gimnasio','Centro de salud / terapia','Actividad comunitaria / religiosa','Transporte escolar','Variable','Otro lugar'],
+ medios_comunicacion:['Llamada telefónica','SMS / mensaje de texto','WhatsApp / mensajería por datos','Radio','Contacto fuera de la zona','Mensaje mediante tercero','Otro medio'],
+ reglas_sin_comunicacion:['Ejecutar el plan sin esperar llamada','Primero permanecer seguro','Punto A y luego Punto B','Priorizar contacto fuera de la zona','Dependientes siguen protocolo de su institución','Otra regla acordada'],
+ tipos_mascota:['Perro','Gato','Ave','Roedor / pequeño mamífero','Reptil','Otra mascota'],
+ paises:[['VE','Venezuela','🇻🇪'],['CL','Chile','🇨🇱'],['CO','Colombia','🇨🇴'],['PE','Perú','🇵🇪'],['EC','Ecuador','🇪🇨'],['AR','Argentina','🇦🇷'],['MX','México','🇲🇽'],['ES','España','🇪🇸'],['OTRO','Otro país','🌎']]
+};
+const THREAT_ACTIONS=[['stay','Permanecer en lugar seguro'],['evacuate','Evacuar / desplazarse'],['official','Seguir instrucciones oficiales'],['mixed','Depende de las condiciones']];
+const SEP_ACTIONS=[['stay_place','Permanecer en el lugar hasta reunificación autorizada'],['point_a','Ir al Punto A si es seguro'],['point_b','Ir al Punto B si el Punto A no es accesible'],['protocol','Seguir protocolo del lugar y esperar retiro / reunificación'],['home','Regresar a casa solo si la ruta es segura'],['other','Otro acuerdo particular']];
+const CORE_BAG=[['agua','Agua'],['alimentos','Alimentos no perecederos'],['linterna','Linterna'],['radio','Radio'],['energia','Baterías / power bank'],['botiquin','Botiquín'],['documentos','Copias de documentos'],['efectivo','Efectivo'],['llaves','Copias de llaves']];
 /*__PEF_V4_BOUNDARY_03_0__*/
 /*__PEF_V4_BOUNDARY_03_1__*/
 /*__PEF_V4_BOUNDARY_03_2__*/
