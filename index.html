@@ -71,13 +71,14 @@ a { color: var(--teal); font-weight: 700; text-decoration-thickness: 1px; text-u
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .logo { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; background: #fff; border: 2px solid rgba(255,255,255,.94); box-shadow: 0 7px 22px rgba(0,32,91,.15); flex: 0 0 54px; }
 .brandcopy { min-width: 0; }
-.brandcopy strong { display: block; color: var(--navy); font-size: .98rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.brandcopy span { display: block; color: var(--muted); font-size: .7rem; margin-top: 2px; }
+.brandcopy strong { display: block; color: var(--navy); font-size: .98rem; font-weight: 800; white-space: nowrap; }
+.brandcopy span { display: block; color: var(--muted); font-size: .7rem; margin-top: 2px; white-space: nowrap; }
 
 .header-actions { display: flex; gap: 7px; align-items: center; }
 .language-select { height: var(--tap); max-width: 118px; padding: 0 30px 0 10px; border: 1px solid var(--line); border-radius: 15px; background-color: rgba(255,255,255,.94); color: var(--navy); font: 800 .72rem Outfit, sans-serif; box-shadow: 0 5px 18px rgba(0,32,91,.05); cursor: pointer; }
 .language-select:focus-visible { outline: 3px solid rgba(0,123,133,.22); outline-offset: 2px; }
 .iconbtn { width: var(--tap); height: var(--tap); min-width: var(--tap); display: grid; place-items: center; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.9); color: var(--navy); box-shadow: 0 5px 18px rgba(0,32,91,.05); }
+.home-link { text-decoration: none; background: #eaf8f9; color: #00656d; }
 .iconbtn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .main { padding-top: 12px; }
 .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 4px 0 14px; }
@@ -257,6 +258,17 @@ a { color: var(--teal); font-weight: 700; text-decoration-thickness: 1px; text-u
 .foot { text-align: center; color: #788995; font-size: .69rem; line-height: 1.5; margin: 24px auto 0; max-width: 760px; }
 .print { display: none; }
 
+@media(max-width:719px){
+  .header { display: grid; grid-template-columns: 1fr; gap: 9px; padding: 11px 2px 10px; }
+  .brand { width: 100%; gap: 12px; }
+  .logo { width: 50px; height: 50px; flex-basis: 50px; }
+  .brandcopy { flex: 1; overflow: visible; }
+  .brandcopy strong { font-size: 1.02rem; line-height: 1.15; }
+  .brandcopy span { font-size: .74rem; line-height: 1.25; margin-top: 4px; }
+  .header-actions { width: 100%; display: grid; grid-template-columns: var(--tap) minmax(0,1fr) var(--tap) var(--tap); gap: 7px; }
+  .language-select { width: 100%; max-width: none; }
+}
+
 @media(min-width:720px){
   .app { padding-left: 22px; padding-right: 22px; }
   .hero { padding: 32px; }
@@ -308,9 +320,10 @@ a { color: var(--teal); font-weight: 700; text-decoration-thickness: 1px; text-u
 <header class="header" aria-label="Encabezado">
   <div class="brand">
     <img class="logo" src="https://lh3.googleusercontent.com/d/1MjVa3JxeKC95xEdlcZ5ZFMCKlatbrU2s=w512" alt="Logo La Movida SST Plus" onerror="this.style.display='none'">
-    <div class="brandcopy"><strong>La Movida SST Plus</strong><span>De la Reacción a la Prevención</span></div>
+    <div class="brandcopy"><strong>La Movida de SST Plus</strong><span>De la Reacción a la Prevención</span></div>
   </div>
   <div class="header-actions">
+    <a class="iconbtn home-link" id="siteHomeBtn" href="https://www.movidasst.com/" aria-label="Ir a La Movida de SST Plus"></a>
     <label class="sr" for="languageSelect">Idioma</label>
     <select class="language-select" id="languageSelect" aria-label="Idioma">
       <option value="es">🇪🇸 Español</option>
@@ -341,7 +354,7 @@ a { color: var(--teal); font-weight: 700; text-decoration-thickness: 1px; text-u
 (()=>{'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const VERSION='4.2.0';
+const VERSION='4.2.1';
 const KEY='pefamiliar_v4_state', OLD_KEYS=['pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
@@ -994,6 +1007,7 @@ function bind(){
   $$('.nav [data-nav]').forEach(b=>b.onclick=()=>routeTo(b.dataset.nav));
   $('#helpBtn').innerHTML=I.help;
   $('#quickBtn').innerHTML=I.quick;
+  $('#siteHomeBtn').innerHTML=I.home;
   $('#helpBtn').onclick=helpOverlay;
   $('#quickBtn').onclick=()=>routeTo('quick');
   const languageSelect=$('#languageSelect');
