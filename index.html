@@ -403,6 +403,10 @@ const KEY='pefamiliar_v5_state', OLD_KEYS=['pefamiliar_v4_state','pefamiliar_v3_
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
 const DB_NAME='pefamiliar_v4_db', DB_VERSION=1, CATALOG_KEY='pef_catalog_cache_v2';
+let formDirty=false;
+function isoToday(value=new Date()){const d=value instanceof Date?value:new Date(value);return Number.isNaN(d.getTime())?new Date().toISOString().slice(0,10):d.toISOString().slice(0,10)}
+function currentLocale(){return{es:'es-ES',en:'en-US',pt:'pt-BR',fr:'fr-FR'}[currentLang]||'es-ES'}
+function formatDate(value,withTime=false){const d=new Date(value);if(Number.isNaN(d.getTime()))return'—';return withTime?d.toLocaleString(currentLocale()):d.toLocaleDateString(currentLocale())}
 const SUPABASE_URL='https://lfdmbkzghnwvsapxypvt.supabase.co', SUPABASE_KEY='sb_publishable_bRnkA6PA8-v073nrw9zxiQ_8rVGiOn1';
 
 const I={
@@ -483,13 +487,14 @@ function localize(root=document){
   document.documentElement.dataset.locale=locale;
   const select=$('#languageSelect');if(select)select.value=currentLang;
   if(currentLang==='es')return;
-  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>/\S/.test(n.nodeValue||'')&&!['SCRIPT','STYLE'].includes(n.parentElement?.tagName)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>/\S/.test(n.nodeValue||'')&&!['SCRIPT','STYLE'].includes(n.parentElement?.tagName)&&!n.parentElement?.closest('[data-no-translate]')?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});
   const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(n=>n.nodeValue=trText(n.nodeValue));
   $$('[placeholder],[aria-label],[title]',root).forEach(el=>['placeholder','aria-label','title'].forEach(a=>{if(el.hasAttribute(a))el.setAttribute(a,trText(el.getAttribute(a)))}));
 }
 function setLanguage(lang){
   if(!SUPPORTED_LANGS.includes(lang))return;
-  currentLang=lang;try{localStorage.setItem(LANG_KEY,lang)}catch{}
+  if(formDirty&&!confirm('Hay cambios sin guardar. ¿Deseas cambiar el idioma y descartarlos?')){const s=$('#languageSelect');if(s)s.value=currentLang;return}
+  formDirty=false;currentLang=lang;try{localStorage.setItem(LANG_KEY,lang)}catch{}
   location.reload();
 }
 
@@ -571,7 +576,7 @@ function normalizeAssessment(raw={},legacy={}){
     gaps:cleanNames(a.gaps),actions:cleanNames(a.actions),memberPlaceActions:cleanMemberPlaceActions(a.memberPlaceActions),notes:String(a.notes||'').trim()
   };
 }
-function blank(){return{schema:5,version:VERSION,family:'',city:'',country:'VE',countryOther:'',members:[],pets:[],threats:[],customThreats:[],threatAssessments:{},vulns:[],caps:[],riskReview:{vulns:false,caps:false,explicit:false},custom:{threat:'',vuln:'',cap:''},threatPlans:{},reunion:{outsideZone:'',insideNA:false,insideZone:'',pointA:'',pointB:'',pointBNA:false,pointRule:''},separated:{},roles:{coord:'',comm:'',kit:'',utilities:'',pets:'NA'},support:{},communication:{primary:'',alt:'',externalName:'',externalPhone:'',externalOutside:true,noComm:'',noCommOther:''},bag:{},home:{exits:'',shutoffGas:'',shutoffPower:'',shutoffWater:'',safeArea:'',documents:'pending',notes:''},drills:[],simulations:[],lastReview:'',settings:{largeText:false,highContrast:false},updated:new Date().toISOString()}}
+function blank(){return{schema:5,version:VERSION,createdAt:new Date().toISOString(),planDate:isoToday(),family:'',city:'',country:'VE',countryOther:'',members:[],pets:[],threats:[],customThreats:[],threatAssessments:{},vulns:[],caps:[],riskReview:{vulns:false,caps:false,explicit:false},custom:{threat:'',vuln:'',cap:''},threatPlans:{},reunion:{outsideZone:'',insideNA:false,insideZone:'',pointA:'',pointB:'',pointBNA:false,pointRule:''},separated:{},roles:{coord:'',comm:'',kit:'',utilities:'',pets:'NA'},support:{},communication:{primary:'',alt:'',externalName:'',externalPhone:'',externalOutside:true,noComm:'',noCommOther:''},bag:{},home:{exits:'',shutoffGas:'',shutoffPower:'',shutoffWater:'',safeArea:'',documents:'pending',notes:''},drills:[],simulations:[],lastReview:'',settings:{largeText:false,highContrast:false},updated:new Date().toISOString()}}
 
 function syncLegacyRiskState(target=state){
   const active=(target.threats||[]).map(t=>target.threatAssessments?.[t]||blankAssessment());
@@ -596,6 +601,8 @@ function isCustomThreat(id){return !!state?.customThreats?.some(x=>x.id===id)}
 function migrate(o){
   const source=o&&typeof o==='object'&&!Array.isArray(o)?o:{}, b=blank(), x={...b,...source};
   x.schema=5; x.version=VERSION; x.country=String(source.country||'VE').toUpperCase();
+  x.createdAt=source.createdAt||source.updated||new Date().toISOString();
+  x.planDate=/^\d{4}-\d{2}-\d{2}$/.test(String(source.planDate||''))?String(source.planDate):isoToday(x.createdAt);
   x.settings={...b.settings,...(source.settings||{})};
   x.reunion={...b.reunion,...(source.reunion||{})};
   x.roles={...b.roles,...(source.roles||{})};
@@ -689,7 +696,7 @@ async function initState(){
 }
 
 async function saveState(msg='Guardado',checkpoint=false,label='Actualización del plan'){
-  state.updated=new Date().toISOString();
+  state.updated=new Date().toISOString();if(!state.createdAt)state.createdAt=state.updated;if(!state.planDate)state.planDate=isoToday(state.createdAt);formDirty=false;
   let ok=false;
   try{localStorage.setItem(KEY,JSON.stringify(state));ok=true}catch{}
   const internalOk=await idbPut('state',typeof structuredClone==='function'?structuredClone(state):JSON.parse(JSON.stringify(state)),'current');
@@ -777,6 +784,12 @@ function memberPlaces(m){return[...new Set([m?.place,...(Array.isArray(m?.places
 function extraPlaces(m){return memberPlaces(m).filter(p=>p!==m.place)}
 function personName(id){if(id==='NA')return'No aplica';return humans().find(m=>m.id===id)?.name||'Pendiente'}
 
+function removePersonReferences(id){
+  for(const key of Object.keys(state.roles))if(state.roles[key]===id)state.roles[key]='';
+  delete state.support[id];delete state.separated[id];
+  for(const m of humans()){if(m.pickup?.primary===id)m.pickup.primary='';if(m.pickup?.backup===id)m.pickup.backup='';const s=state.support[m.id];if(s?.primary===id)s.primary='';if(s?.backup===id)s.backup=''}
+  for(const a of Object.values(state.threatAssessments||{}))if(a?.memberPlaceActions)delete a.memberPlaceActions[id];
+}
 function personOptions(selected='',allowNA=false,exclude=''){
   let h=allowNA?'<option value="NA">No aplica</option>':'<option value="">Seleccionar integrante</option>';
   return h+humans().filter(m=>m.id!==exclude).map(m=>`<option value="${m.id}" ${m.id===selected?'selected':''}>${esc(m.name)}${m.relation?' · '+esc(m.relation):''}</option>`).join('');
@@ -794,7 +807,8 @@ function sepText(m,p=m.place){
   return (q?.[1]||a.mode)+(a.other?' · '+a.other:'');
 }
 
-function needsSchool(m){return ['child','teen'].includes(m.age)&&memberPlaces(m).some(p=>/Escuela|colegio|Guardería|Transporte escolar/i.test(p))}
+function isSchoolPlace(value){return /escuela|colegio|guardería|transporte escolar|school|college|childcare|daycare|school transport|escola|colégio|creche|école|collège|garderie|transport scolaire/i.test(String(value||''))}
+function needsSchool(m){return ['child','teen'].includes(m.age)&&memberPlaces(m).some(isSchoolPlace)}
 
 function requiredBag(){
   const out=[...CORE_BAG];
@@ -829,16 +843,16 @@ function suggestedVulns(){
 }
 
 function completeness(){
-  const family=humans().length&&humans().every(m=>m.name&&m.relation&&m.place)?100:Math.min(90,humans().length*25);
-  const hasThreats=state.threats.length>0, activeAssessments=state.threats.map(assessmentFor), riskParts=[hasThreats,hasThreats&&activeAssessments.every(a=>a.vulnsReviewed),hasThreats&&activeAssessments.every(a=>a.capsReviewed),hasThreats&&activeAssessments.every(a=>a.response)];
+  const people=humans(),familyParts=[people.length>0,!!state.planDate,people.length>0&&people.some(m=>m.isSelf),people.length>0&&people.every(m=>m.name),people.length>0&&people.every(m=>m.relation),people.length>0&&people.every(m=>m.place)];
+  const family=Math.round(familyParts.filter(Boolean).length/familyParts.length*100);
+  const hasThreats=state.threats.length>0,activeAssessments=state.threats.map(assessmentFor),riskParts=[hasThreats,hasThreats&&activeAssessments.every(a=>a.vulnsReviewed),hasThreats&&activeAssessments.every(a=>a.capsReviewed),hasThreats&&activeAssessments.every(a=>a.response)];
   const identify=Math.round(riskParts.filter(Boolean).length/riskParts.length*100);
-  const reu=!!(state.reunion.pointA&&state.reunion.outsideZone&&(state.reunion.pointB||state.reunion.pointBNA));
-  const sep=humans().length>0&&humans().every(m=>memberPlaces(m).every(p=>separatedForPlace(m,p)?.mode));
-  const roles=!!(state.roles.coord&&state.roles.comm&&state.roles.kit&&(!hasPets()||(state.roles.pets&&state.roles.pets!=='NA')));
-  const comm=!!(state.communication.primary&&state.communication.externalName&&state.communication.externalPhone&&state.communication.noComm);
-  const agree=Math.round([reu,sep,roles,comm].filter(Boolean).length/4*100);
-  const bs=bagStats(), prepare=Math.round(((bs.pct)+(state.home.documents==='ready'?100:state.home.documents==='partial'?50:0))/2);
-  const practice=state.drills.length?100:state.simulations.length?60:0;
+  const reu=!!(state.reunion.pointA&&state.reunion.outsideZone&&(state.reunion.pointB||state.reunion.pointBNA)),sep=people.length>0&&people.every(m=>memberPlaces(m).every(p=>separatedForPlace(m,p)?.mode));
+  const coreRoles=!!(state.roles.coord&&state.roles.comm&&state.roles.kit&&state.roles.utilities&&(!hasPets()||(state.roles.pets&&state.roles.pets!=='NA')));
+  const supportReady=people.filter(m=>(m.needs||[]).length).every(m=>state.support[m.id]?.mode&&(state.support[m.id].mode!=='assigned'||state.support[m.id].primary));
+  const comm=!!(state.communication.primary&&state.communication.externalName&&state.communication.externalPhone&&state.communication.noComm),agreeParts=[reu,sep,coreRoles,supportReady,comm],agree=Math.round(agreeParts.filter(Boolean).length/agreeParts.length*100);
+  const bs=bagStats(),docs=state.home.documents==='ready'?100:state.home.documents==='partial'?50:0,homeReady=state.home.exits&&state.home.safeArea&&(state.home.shutoffGas||state.home.shutoffPower||state.home.shutoffWater)?100:0,prepare=Math.round((bs.pct+docs+homeReady)/3);
+  const latestDrill=state.drills.at(-1),practice=latestDrill?(String(latestDrill.improvement||'').trim()?100:80):state.simulations.length?40:0;
   const stages=[['know','Conocer','Quiénes somos y dónde estamos',family,'family'],['identify','Identificar','Amenazas, vulnerabilidades, capacidades y respuesta',identify,'identify'],['agree','Acordar','Reunificación, roles y comunicación',agree,'reunion'],['prepare','Preparar','Kit, vivienda y documentos',prepare,'bag'],['practice','Practicar','Simulaciones, ejercicios y mejora',practice,'practice']];
   const overall=Math.round(stages.reduce((a,x)=>a+x[3],0)/5);
   return {stages,overall};
@@ -900,7 +914,11 @@ function planStatus(){
   return{cls:'green',icon:'✓',title:'Practicado y en mejora continua',text:'El plan ya fue practicado. Revisa cambios en la familia y registra mejoras periódicamente.',pct:c.overall};
 }
 
-function routeTo(r,arg=''){location.hash='#'+r+(arg?':'+encodeURIComponent(arg):'')}
+function routeTo(r,arg='',force=false){
+  if(formDirty&&!force&&!confirm('Hay cambios sin guardar. ¿Deseas salir de esta pantalla y descartarlos?'))return;
+  formDirty=false;
+  location.hash='#'+r+(arg?':'+encodeURIComponent(arg):'');
+}
 function parseRoute(){const h=(location.hash||'#home').slice(1),p=h.split(':');route=p[0]||'home';routeArg=p.length>1?decodeURIComponent(p.slice(1).join(':')):'';}
 function toast(t){$('#live').textContent=t;const old=$('.toast');if(old)old.remove();const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2300)}
 function hIcon(name){return I[name]||''}
@@ -941,7 +959,7 @@ function plan(){const iss=coherence();return`${pageHead('Mi plan en 5 etapas','S
 
 function family(){
   const ci=countryInfo();
-  return`${pageHead('1 · Conocer','Quiénes somos, dónde estamos normalmente y quién necesita apoyo.','home')}<section class="country-banner"><b>${ci.flag} ${ci.layer}</b><p>${ci.note}</p></section><section class="section card"><div class="row"><div class="field"><label>Nombre o apellido familiar</label><input id="familyName" value="${esc(state.family)}" placeholder="Ej. Linares"></div><div class="field"><label>Ciudad / localidad</label><input id="familyCity" value="${esc(state.city)}" placeholder="Ej. Caracas"></div></div><div class="row"><div class="field"><label>País</label><select id="country">${countryList().map(([c,n,f])=>`<option value="${c}" ${state.country===c?'selected':''}>${f||'🌎'} ${esc(n)}</option>`).join('')}</select></div><div class="field" id="countryOtherWrap" style="display:${state.country==='OTRO'?'block':'none'}"><label>Otro país</label><input id="countryOther" value="${esc(state.countryOther||'')}" placeholder="Escribe el país"></div></div><button class="btn primary" data-action="saveFamilyMeta">Guardar datos generales</button></section>
+  return`${pageHead('1 · Conocer','Quiénes somos, dónde estamos normalmente y quién necesita apoyo.','home')}<section class="country-banner"><b>${ci.flag} ${ci.layer}</b><p>${ci.note}</p></section><section class="section card"><div class="row"><div class="field"><label>Fecha del plan</label><input id="planDate" type="date" required value="${esc(state.planDate||isoToday())}"></div><div class="field"><label>Nombre o apellido familiar</label><input id="familyName" value="${esc(state.family)}" placeholder="Ej. Linares"></div><div class="field"><label>Ciudad / localidad</label><input id="familyCity" value="${esc(state.city)}" placeholder="Ej. Caracas"></div></div><div class="row"><div class="field"><label>País</label><select id="country">${countryList().map(([c,n,f])=>`<option value="${c}" ${state.country===c?'selected':''}>${f||'🌎'} ${esc(n)}</option>`).join('')}</select></div><div class="field" id="countryOtherWrap" style="display:${state.country==='OTRO'?'block':'none'}"><label>Otro país</label><input id="countryOther" value="${esc(state.countryOther||'')}" placeholder="Escribe el país"></div></div><button class="btn primary" data-action="saveFamilyMeta">Guardar datos generales</button></section>
 <section class="section"><div class="section-title"><div><h2>Integrantes</h2><p>Agrega una persona una sola vez; la app la reutiliza después.</p></div><button class="btn soft small" data-route="member">＋ Integrante</button></div><div class="list">${humans().length?humans().map(memberCard).join(''):'<div class="empty">Empieza por las personas que forman parte del plan.</div>'}</div></section>
 <section class="section"><div class="section-title"><div><h2>Mascotas</h2><p>Si no hay mascotas, no genera pendientes.</p></div><button class="btn soft small" data-action="addPet">＋ Mascota</button></div>${hasPets()?`<div class="list">${state.pets.map(p=>`<div class="item"><div class="itemtop"><div><strong>${esc(p.name)}</strong><p>${esc(p.type)}</p></div><button class="btn danger small" data-delpet="${p.id}">Eliminar</button></div></div>`).join('')}</div>`:'<div class="na">No aplica · no hay mascotas registradas.</div>'}</section>
 <section class="section">${why('¿Por qué empezar por la familia?','Porque los roles, el kit y la reunificación cambian según la edad, los lugares y las necesidades reales de cada integrante. La información se reutiliza para evitar pedir lo mismo dos veces.')}</section><div class="wizard-actions"><button class="btn primary" data-action="saveFamilyAndContinue"><span>Continuar</span> · 2 · <span>Identificar</span> →</button></div>`;
@@ -950,7 +968,7 @@ function family(){
 function memberCard(m){
   const ex=extraPlaces(m),tags=(m.needs||[]).map(n=>`<span class="tag ${n==='meds'?'yellow':''}">${esc(label('necesidades_apoyo',n))}</span>`).join('');
   const school=needsSchool(m);
-  return`<div class="item"><div class="itemtop"><div><strong>${esc(m.name)}</strong>${m.isSelf?'<span class="tag green" style="margin-left:7px">Soy yo · elabora el plan</span>':''}<p>${esc(m.relation||'Relación pendiente')} · Principal: ${esc(m.place||'Pendiente')}${ex.length?' · Otros: '+esc(ex.join(', ')):''}</p><div class="tags">${tags||'<span class="tag gray">Sin necesidades especiales registradas</span>'}${school?`<span class="tag ${m.pickup?.primary?'green':'red'}">${m.pickup?.primary?'Retiro definido':'Retiro pendiente'}</span>`:''}</div></div><div><button class="btn soft small" data-route="member" data-arg="${m.id}">Editar</button></div></div></div>`;
+  return`<div class="item"><div class="itemtop"><div><strong data-no-translate>${esc(m.name)}</strong>${m.isSelf?'<span class="tag green" style="margin-left:7px">Soy yo · elabora el plan</span>':''}<p>${esc(m.relation||'Relación pendiente')} · Principal: ${esc(m.place||'Pendiente')}${ex.length?' · Otros: '+esc(ex.join(', ')):''}</p><div class="tags">${tags||'<span class="tag gray">Sin necesidades especiales registradas</span>'}${school?`<span class="tag ${m.pickup?.primary?'green':'red'}">${m.pickup?.primary?'Retiro definido':'Retiro pendiente'}</span>`:''}</div></div><div class="actions" style="margin:0"><button class="btn soft small" data-route="member" data-arg="${m.id}">Editar</button><button class="btn danger small" data-delmember="${m.id}">Eliminar</button></div></div></div>`;
 }
 
 function memberEditor(){
@@ -1064,7 +1082,7 @@ function simulationResult(threat,profile,noData){
     const specific=assessment.memberPlaceActions?.[m.id]?.[p]||'';
     rows.push({m,p,a,specific});
     if(!a?.mode) gaps.push(`${m.name} no tiene acuerdo para ${p}`);
-    if(needsSchool(m)&&/Escuela|colegio|Guardería/i.test(p)&&!m.pickup?.primary) gaps.push(`${m.name} no tiene persona principal de retiro`);
+    if(needsSchool(m)&&isSchoolPlace(p)&&!m.pickup?.primary) gaps.push(`${m.name} no tiene persona principal de retiro`);
   }
   if(noData&&!state.communication.noComm) gaps.push('No existe una regla para actuar sin comunicación');
   if(!state.reunion.pointA) gaps.push('No está definido el Punto A');
@@ -1193,6 +1211,7 @@ function bind(){
   const languageSelect=$('#languageSelect');
   if(languageSelect){languageSelect.value=currentLang;languageSelect.onchange=e=>setLanguage(e.target.value)}
   $$('[data-action]').forEach(b=>{const a=b.dataset.action;b.onclick=e=>handleAction(a,e,b)});
+  $$('[data-delmember]').forEach(b=>b.onclick=async()=>{const id=b.dataset.delmember,m=humans().find(x=>x.id===id);if(!m||!confirm(`¿Eliminar a “${m.name}” del plan? Se limpiarán sus roles y acuerdos activos.`))return;state.members=state.members.filter(x=>x.id!==id);removePersonReferences(id);await saveState('Integrante eliminado',true,'Eliminar integrante');safeRender()});
   $$('[data-delpet]').forEach(b=>b.onclick=async()=>{
     state.pets=state.pets.filter(p=>p.id!==b.dataset.delpet);
     if(!state.pets.length) state.roles.pets='NA';
@@ -1444,6 +1463,7 @@ async function saveDrill(e){
 
 async function handleAction(a,e,b){
   if(a==='saveFamilyMeta'){
+    state.planDate=$('#planDate')?.value||state.planDate||isoToday();
     state.family=$('#familyName').value.trim();
     state.city=$('#familyCity').value.trim();
     state.country=$('#country').value;
@@ -1451,6 +1471,7 @@ async function handleAction(a,e,b){
     await saveState('Datos generales guardados',true,'Actualizar datos generales');
     safeRender();
   }else if(a==='saveFamilyAndContinue'){
+    state.planDate=$('#planDate')?.value||state.planDate||isoToday();
     state.family=$('#familyName').value.trim();
     state.city=$('#familyCity').value.trim();
     state.country=$('#country').value;
