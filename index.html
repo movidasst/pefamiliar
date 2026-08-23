@@ -458,7 +458,14 @@ Object.assign(UI_TRANSLATIONS.en,{'Ajustes por integrante y lugar':'Adjustments 
 Object.assign(UI_TRANSLATIONS.pt,{'Ajustes por integrante y lugar':'Ajustes por membro e local','Opcionales. Complementan el acuerdo general cuando esta amenaza requiere una indicación distinta.':'Opcionais. Complementam o acordo geral quando esta ameaça exige uma orientação diferente.','Ajuste específico para esta amenaza':'Ajuste específico para esta ameaça','Ajuste específico:':'Ajuste específico:','Ajustes por amenaza:':'Ajustes por ameaça:'});
 Object.assign(UI_TRANSLATIONS.fr,{'Ajustes por integrante y lugar':'Ajustements par membre et par lieu','Opcionales. Complementan el acuerdo general cuando esta amenaza requiere una indicación distinta.':'Facultatifs. Ils complètent l’accord général lorsque ce danger exige une consigne différente.','Ajuste específico para esta amenaza':'Ajustement spécifique pour ce danger','Ajuste específico:':'Ajustement spécifique :','Ajustes por amenaza:':'Ajustements par danger :'});
 
+const TRANSLATION_MATCHERS={};
 function trText(value){
+  if(currentLang==='es'||!value)return value;
+  const dict=UI_TRANSLATIONS[currentLang]||{}, lead=value.match(/^\s*/)?.[0]||'', tail=value.match(/\s*$/)?.[0]||'', core=value.trim();
+  if(!core)return value;
+  if(dict[core])return lead+dict[core]+tail;
+  if(!TRANSLATION_MATCHERS[currentLang]){
+    const keys=Object.keys(dict).filter(Boolean).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\function trText(value){
   if(currentLang==='es'||!value)return value;
   const dict=UI_TRANSLATIONS[currentLang]||{}, lead=value.match(/^\s*/)?.[0]||'', tail=value.match(/\s*$/)?.[0]||'', core=value.trim();
   if(!core)return value;
@@ -466,6 +473,11 @@ function trText(value){
   let out=core;
   const replacements=Object.entries(dict).sort((a,b)=>b[0].length-a[0].length);
   for(const[from,to]of replacements) out=out.split(from).join(to);
+  return lead+out+tail;
+}'));
+    TRANSLATION_MATCHERS[currentLang]=keys.length?new RegExp(keys.join('|'),'g'):null;
+  }
+  const matcher=TRANSLATION_MATCHERS[currentLang], out=matcher?core.replace(matcher,match=>dict[match]):core;
   return lead+out+tail;
 }
 function localize(root=document){
