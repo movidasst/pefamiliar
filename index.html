@@ -114,13 +114,16 @@ a { color: var(--teal); font-weight: 700; text-decoration-thickness: 1px; text-u
 .community-links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:14px; }
 .community-link { min-height:82px; display:flex; align-items:center; gap:12px; padding:14px; border-radius:20px; text-decoration:none; border:1px solid var(--line); box-shadow:var(--shadow); transition:transform .18s ease,box-shadow .18s ease; }
 .community-link:hover { transform:translateY(-2px); box-shadow:0 18px 38px rgba(0,123,133,.14); }
-.community-link .community-icon { width:46px; height:46px; flex:0 0 46px; display:grid; place-items:center; border-radius:15px; font-size:1.35rem; }
+.community-link .community-icon { width:48px; height:48px; flex:0 0 48px; display:grid; place-items:center; border-radius:16px; }
+.community-link .community-icon svg { width:28px; height:28px; display:block; }
 .community-link strong { display:block; color:var(--navy); line-height:1.15; }
 .community-link span { display:block; margin-top:4px; color:var(--muted); font-size:.75rem; font-weight:600; }
 .community-link.whatsapp { background:linear-gradient(135deg,#f1fff6,#fff); border-color:#bfe8cd; }
-.community-link.whatsapp .community-icon { background:#25d366; color:#fff; }
-.community-link.academy { background:linear-gradient(135deg,#eef7ff,#fff); border-color:#c9d9ee; }
-.community-link.academy .community-icon { background:var(--navy); color:#fff; }
+.community-link.whatsapp .community-icon { background:#e8fbef; color:#1da851; box-shadow:inset 0 0 0 1px #bce9ca; }
+.community-link.whatsapp .community-icon svg { fill:#20b858; }
+.community-link.academy { background:linear-gradient(135deg,#fffdf5,#fff); border-color:#eadfab; }
+.community-link.academy .community-icon { background:#fff8d9; color:var(--navy); box-shadow:inset 0 0 0 1px #f0dfa0; }
+.community-link.academy .community-icon svg { fill:none; stroke:var(--navy); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 @media(max-width:620px){.community-links{grid-template-columns:1fr}.community-link{min-height:74px}}
 
 .card, .stage-card, .item { background: rgba(255,255,255,.94); border: 1px solid var(--line); box-shadow: var(--shadow); }
@@ -411,7 +414,7 @@ body.donation-open { overflow: hidden; }
 (()=>{'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const VERSION='5.3.3';
+const VERSION='5.3.4';
 const KEY='pefamiliar_v5_state', OLD_KEYS=['pefamiliar_v4_state','pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
@@ -1018,10 +1021,10 @@ function home(){
   return`<section class="hero"><div class="hero-grid"><div><span class="eyebrow">Plan Familiar de Emergencia · v${VERSION}</span><h1>${state.family?`Familia ${esc(state.family)}`:'Un plan que todos puedan recordar'}</h1><p>Conoce, identifica, acuerda, prepara y practica. La aplicación reutiliza lo que tu familia ya declaró y te muestra solo la siguiente decisión útil.</p><div class="actions"><button class="btn yellow" data-route="${next[4]}">Continuar · ${next[1]} →</button><button class="btn ghost" data-route="simulation">Probar nuestro plan</button></div></div><div class="hero-visual">${people.length?people.map(m=>`<div class="mini-person"><b>${esc(m.name)}</b><span>${esc(m.place||'Lugar pendiente')}</span></div>`).join(''):'<div class="mini-person"><b>Tu familia</b><span>empieza aquí</span></div><div class="mini-person"><b>Punto A</b><span>acuerdo principal</span></div><div class="mini-person"><b>Contacto</b><span>respaldo</span></div><div class="mini-person"><b>Kit</b><span>adaptado</span></div>'}</div></div></section>
 <section class="community-links" aria-label="Comunidad y formación">
   <a class="community-link whatsapp" href="https://whatsapp.com/channel/0029Va0mlH5Jf05mrcCz8r3e" target="_blank" rel="noopener noreferrer" aria-label="Unirse al canal de WhatsApp de La Movida SST Plus">
-    <span class="community-icon" aria-hidden="true">◉</span><span><strong>Únete al canal de WhatsApp</strong><span>Noticias, recursos y aprendizaje colaborativo de La Movida SST Plus.</span></span>
+    <span class="community-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M16 3.2A12.5 12.5 0 0 0 5.1 21.8L3.4 28.7l7.1-1.7A12.6 12.6 0 1 0 16 3.2Zm0 22.8c-1.9 0-3.7-.5-5.3-1.4l-.4-.2-4.2 1 1-4.1-.3-.4A10.2 10.2 0 1 1 16 26Zm5.6-7.6c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.8-.9-3-1.6-4.2-3.7-.3-.6.3-.5.9-1.8.1-.2.1-.4 0-.6l-1-2.4c-.3-.6-.6-.5-.9-.5h-.7c-.3 0-.7.1-1 .5-.3.4-1.3 1.3-1.3 3.1s1.3 3.6 1.5 3.8c.2.3 2.6 4 6.4 5.6.9.4 1.6.6 2.1.8.9.3 1.7.3 2.4.1.7-.1 1.8-.7 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.3-.3-.4-.6-.6Z"/></svg></span><span><strong>Únete al canal de WhatsApp</strong><span>Noticias, recursos y aprendizaje colaborativo de La Movida SST Plus.</span></span>
   </a>
   <a class="community-link academy" href="https://movidasst.org/course/info.php?id=85" target="_blank" rel="noopener noreferrer" aria-label="Abrir curso gratuito Plan Familiar de Emergencia">
-    <span class="community-icon" aria-hidden="true">🎓</span><span><strong>Curso gratuito · Plan Familiar de Emergencia</strong><span>Automatrícula disponible en la Academia de La Movida SST.</span></span>
+    <span class="community-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="m3.5 12.2 12.5-6 12.5 6L16 18.3 3.5 12.2Z"/><path d="M8.5 15v6.3c4.8 3.5 10.2 3.5 15 0V15M28.5 12.2v8.2"/></svg></span><span><strong>Curso gratuito · Plan Familiar de Emergencia</strong><span>Automatrícula disponible en la Academia de La Movida SST.</span></span>
   </a>
 </section>
 <section class="section status-card status-${st.cls}"><div class="status-top"><div class="status-icon">${st.icon}</div><div><h2>${st.title}</h2><p>${st.text}</p></div></div><div><div class="progress"><i style="width:${st.pct}%"></i></div><small class="hint" style="margin-top:5px">Avance global ${st.pct}% · promedio de las cinco etapas; las alertas consideran además la coherencia.</small></div></section>
