@@ -33,6 +33,7 @@
   --font: 1rem;
 }
 * { box-sizing: border-box; }
+.sr { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
 html { scroll-behavior: smooth; font-size: var(--font); }
 body {
   margin: 0;
@@ -321,7 +322,7 @@ body.donation-open { overflow: hidden; }
   .brandcopy { flex: 1; overflow: visible; }
   .brandcopy strong { font-size: 1.02rem; line-height: 1.15; }
   .brandcopy span { font-size: .74rem; line-height: 1.25; margin-top: 4px; }
-  .header-actions { width: 100%; display: grid; grid-template-columns: var(--tap) minmax(0,1fr) auto var(--tap) var(--tap); gap: 7px; }
+  .header-actions { width: 100%; display: grid; grid-template-columns: var(--tap) minmax(0,1fr) auto; gap: 7px; }
   .language-control { width:100%; min-width:0; }
   .language-select { width: 100%; max-width: none; }
   .donation-trigger { min-width:82px; padding:0 10px; }
@@ -394,8 +395,6 @@ body.donation-open { overflow: hidden; }
     <button class="iconbtn donation-trigger" id="donationBtn" type="button" aria-label="Donar" title="Donar">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.35-9.33-8.32C.9 9.67 2.08 6 5.5 5.18 7.42 4.72 9.14 5.5 12 8c2.86-2.5 4.58-3.28 6.5-2.82 3.42.82 4.6 4.49 2.83 7.5C19 16.65 12 21 12 21Z"/></svg><span class="donate-label">Donar</span>
     </button>
-    <button class="iconbtn" id="helpBtn" aria-label="Ayuda de esta pantalla"></button>
-    <button class="iconbtn" id="quickBtn" aria-label="Abrir plan rápido"></button>
   </div>
 </header>
 <main id="main" class="main" tabindex="-1"></main>
@@ -419,7 +418,7 @@ body.donation-open { overflow: hidden; }
 (()=>{'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const VERSION='5.3.5';
+const VERSION='5.3.6';
 const KEY='pefamiliar_v5_state', OLD_KEYS=['pefamiliar_v4_state','pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
@@ -1310,11 +1309,7 @@ function focusMain(){requestAnimationFrame(()=>{const h=$('#main h1');(h||$('#ma
 function bind(){
   $$('[data-route]').forEach(b=>b.onclick=e=>{e.preventDefault();routeTo(b.dataset.route,b.dataset.arg||'')});
   $$('.nav [data-nav]').forEach(b=>b.onclick=()=>routeTo(b.dataset.nav));
-  $('#helpBtn').innerHTML=I.help;
-  $('#quickBtn').innerHTML=I.quick;
-  $('#siteHomeBtn').innerHTML=I.home;
-  $('#helpBtn').onclick=helpOverlay;
-  $('#quickBtn').onclick=()=>routeTo('quick');
+  const siteHomeBtn=$('#siteHomeBtn');if(siteHomeBtn)siteHomeBtn.innerHTML=I.home;
   const languageSelect=$('#languageSelect');
   if(languageSelect){languageSelect.value=currentLang;languageSelect.onchange=e=>setLanguage(e.target.value)}
   $$('[data-action]').forEach(b=>{const a=b.dataset.action;b.onclick=e=>handleAction(a,e,b)});
