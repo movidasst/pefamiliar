@@ -418,7 +418,7 @@ body.donation-open { overflow: hidden; }
 (()=>{'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const VERSION='5.3.8';
+const VERSION='5.3.9';
 const KEY='pefamiliar_v5_state', OLD_KEYS=['pefamiliar_v4_state','pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
@@ -527,6 +527,10 @@ Object.assign(UI_TRANSLATIONS.fr,{"Compartir mi plan":"Partager mon plan","Agreg
 Object.assign(UI_TRANSLATIONS.en,{"Tu dispositivo descargó el documento para que puedas compartirlo":"Your device downloaded the Word document so you can share it","No se pudo abrir el menú de compartir; descargamos el documento":"The share menu could not be opened; the Word document was downloaded"});
 Object.assign(UI_TRANSLATIONS.pt,{"Tu dispositivo descargó el documento para que puedas compartirlo":"Seu dispositivo baixou o documento do Word para que você possa compartilhá-lo","No se pudo abrir el menú de compartir; descargamos el documento":"Não foi possível abrir o menu de compartilhamento; o documento do Word foi baixado"});
 Object.assign(UI_TRANSLATIONS.fr,{"Tu dispositivo descargó el documento para que puedas compartirlo":"Votre appareil a téléchargé le document Word afin que vous puissiez le partager","No se pudo abrir el menú de compartir; descargamos el documento":"Le menu de partage n’a pas pu être ouvert ; le document Word a été téléchargé"});
+
+Object.assign(UI_TRANSLATIONS.en,{"Guardar / imprimir PDF":"Save / print PDF","Abrimos WhatsApp para compartir el plan":"WhatsApp was opened to share the plan"});
+Object.assign(UI_TRANSLATIONS.pt,{"Guardar / imprimir PDF":"Salvar / imprimir PDF","Abrimos WhatsApp para compartir el plan":"Abrimos o WhatsApp para compartilhar o plano"});
+Object.assign(UI_TRANSLATIONS.fr,{"Guardar / imprimir PDF":"Enregistrer / imprimer le PDF","Abrimos WhatsApp para compartir el plan":"WhatsApp a été ouvert pour partager le plan"});
 
 const TRANSLATION_MATCHERS={};
 function trText(value){
@@ -1234,7 +1238,7 @@ function tutorial(){
 function more(){
   const versionsText=catalogSource==='Supabase'?'Catálogos actualizados desde Supabase':catalogSource==='caché'?'Catálogos desde copia local':'Catálogos básicos incluidos';
   const ci=countryInfo();
-  return`${pageHead('Recursos','Tutorial, documentos, respaldo, accesibilidad y datos del plan.','home')}<section class="card privacy"><div class="lock">🔒</div><div><h3 style="margin:0;color:var(--navy)">Tu plan es privado</h3><p style="margin:4px 0 0;color:var(--muted);font-size:.78rem">Nombres, teléfonos, medicamentos y acuerdos se guardan en este dispositivo. Supabase solo entrega catálogos públicos; no recibe tu plan familiar.</p></div></section><section class="section card"><div class="section-title"><div><h2>Productos del plan</h2><p>Elige qué necesita tu familia imprimir o guardar como PDF.</p></div></div><div class="grid two"><button class="btn primary" data-action="sharePlan">↗ Compartir mi plan</button><button class="btn soft" data-print="full">Plan completo</button><button class="btn soft" data-print="quick">Hoja rápida visual</button><button class="btn soft" data-print="cards">Tarjetas individuales</button><button class="btn soft" data-route="map">Mapa lógico familiar</button><button class="btn soft" data-route="tutorial">Tutorial y recomendaciones</button></div></section><section class="section card"><div class="section-title"><div><h2>Respaldo y versiones</h2><p>Recupera cambios importantes sin crear una cuenta.</p></div></div><div class="grid two"><button class="btn soft" data-action="export">Exportar respaldo</button><button class="btn soft" data-action="import">Importar respaldo</button><button class="btn soft" data-route="versions">Historial de versiones</button><button class="btn danger" data-action="reset">Borrar plan del dispositivo</button></div></section><section class="section card"><div class="section-title"><div><h2>Accesibilidad</h2><p>Ajustes guardados en este dispositivo.</p></div></div><div class="settings-row"><div><strong>Texto más grande</strong><div class="hint">Aumenta el tamaño base sin perder estructura.</div></div><label class="switch"><input id="largeText" type="checkbox" ${state.settings.largeText?'checked':''}><span></span></label></div><div class="settings-row"><div><strong>Contraste reforzado</strong><div class="hint">Reduce efectos decorativos y refuerza bordes.</div></div><label class="switch"><input id="highContrast" type="checkbox" ${state.settings.highContrast?'checked':''}><span></span></label></div></section><section class="section country-banner"><b>${ci.flag} ${ci.layer}</b><p>${ci.note}</p><div class="tags">${ci.sources.map(x=>`<span class="tag gray">${esc(x)}</span>`).join('')}</div><div class="actions"><button class="btn ghost small" data-route="family">Cambiar país</button></div></section><section class="section card"><div class="settings-row"><span>Versión de aplicación</span><strong>${VERSION}</strong></div><div class="settings-row"><span>Fuente de listas</span><strong>${esc(versionsText)}</strong></div><div class="settings-row"><span>Fecha del plan</span><strong>${formatDate(state.planDate)}</strong></div><div class="settings-row"><span>Última actualización del plan</span><strong>${formatDate(state.updated)}</strong></div></section><section class="section card"><h3 style="margin:0;color:var(--navy)">Identificación</h3><p style="font-size:.8rem;color:var(--muted)"><strong>Elaborado por David Linares Brea</strong><br><a href="mailto:info@movidasst.com">info@movidasst.com</a><br><a href="https://wa.me/56968615650" target="_blank" rel="noopener">WhatsApp +56 9 6861 5650</a><br>La Movida SST Plus · www.movidasst.com</p></section>`;
+  return`${pageHead('Recursos','Tutorial, documentos, respaldo, accesibilidad y datos del plan.','home')}<section class="card privacy"><div class="lock">🔒</div><div><h3 style="margin:0;color:var(--navy)">Tu plan es privado</h3><p style="margin:4px 0 0;color:var(--muted);font-size:.78rem">Nombres, teléfonos, medicamentos y acuerdos se guardan en este dispositivo. Supabase solo entrega catálogos públicos; no recibe tu plan familiar.</p></div></section><section class="section card"><div class="section-title"><div><h2>Productos del plan</h2><p>Elige qué necesita tu familia imprimir o guardar como PDF.</p></div></div><div class="grid two"><button class="btn primary" data-action="sharePlan">↗ Compartir mi plan</button><button class="btn soft" data-print="full">Guardar / imprimir PDF</button><button class="btn soft" data-print="quick">Hoja rápida visual</button><button class="btn soft" data-print="cards">Tarjetas individuales</button><button class="btn soft" data-route="map">Mapa lógico familiar</button><button class="btn soft" data-route="tutorial">Tutorial y recomendaciones</button></div></section><section class="section card"><div class="section-title"><div><h2>Respaldo y versiones</h2><p>Recupera cambios importantes sin crear una cuenta.</p></div></div><div class="grid two"><button class="btn soft" data-action="export">Exportar respaldo</button><button class="btn soft" data-action="import">Importar respaldo</button><button class="btn soft" data-route="versions">Historial de versiones</button><button class="btn danger" data-action="reset">Borrar plan del dispositivo</button></div></section><section class="section card"><div class="section-title"><div><h2>Accesibilidad</h2><p>Ajustes guardados en este dispositivo.</p></div></div><div class="settings-row"><div><strong>Texto más grande</strong><div class="hint">Aumenta el tamaño base sin perder estructura.</div></div><label class="switch"><input id="largeText" type="checkbox" ${state.settings.largeText?'checked':''}><span></span></label></div><div class="settings-row"><div><strong>Contraste reforzado</strong><div class="hint">Reduce efectos decorativos y refuerza bordes.</div></div><label class="switch"><input id="highContrast" type="checkbox" ${state.settings.highContrast?'checked':''}><span></span></label></div></section><section class="section country-banner"><b>${ci.flag} ${ci.layer}</b><p>${ci.note}</p><div class="tags">${ci.sources.map(x=>`<span class="tag gray">${esc(x)}</span>`).join('')}</div><div class="actions"><button class="btn ghost small" data-route="family">Cambiar país</button></div></section><section class="section card"><div class="settings-row"><span>Versión de aplicación</span><strong>${VERSION}</strong></div><div class="settings-row"><span>Fuente de listas</span><strong>${esc(versionsText)}</strong></div><div class="settings-row"><span>Fecha del plan</span><strong>${formatDate(state.planDate)}</strong></div><div class="settings-row"><span>Última actualización del plan</span><strong>${formatDate(state.updated)}</strong></div></section><section class="section card"><h3 style="margin:0;color:var(--navy)">Identificación</h3><p style="font-size:.8rem;color:var(--muted)"><strong>Elaborado por David Linares Brea</strong><br><a href="mailto:info@movidasst.com">info@movidasst.com</a><br><a href="https://wa.me/56968615650" target="_blank" rel="noopener">WhatsApp +56 9 6861 5650</a><br>La Movida SST Plus · www.movidasst.com</p></section>`;
 }
 
 async function versionsPage(){
@@ -1720,36 +1724,21 @@ function buildShareText(){
   lines.push('','Las instrucciones oficiales y la protección de la vida prevalecen.','Generado con pefamiliar.movidasst.com · La Movida SST Plus');
   return lines.filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n');
 }
-function buildShareDocument(text){
-  const headings=new Set(['PLAN FAMILIAR DE EMERGENCIA · LA MOVIDA SST PLUS','INTEGRANTES Y ACUERDOS','REUNIFICACIÓN','COMUNICACIÓN','PREPARACIÓN']);
-  const content=text.split('\n').map(line=>{
-    const safe=esc(line);
-    if(headings.has(line))return line.startsWith('PLAN ')?`<h1>${safe}</h1>`:`<h2>${safe}</h2>`;
-    if(line.startsWith('• '))return`<p class="item">${safe}</p>`;
-    return line?`<p>${safe}</p>`:'<div class="space"></div>';
-  }).join('');
-  return`<!doctype html><html><head><meta charset="utf-8"><title>${esc(trText('Plan Familiar de Emergencia'))}</title><style>
-  @page{margin:18mm}body{font-family:Arial,sans-serif;color:#334155;line-height:1.45;margin:0}h1{color:#00205b;font-size:24pt;border-bottom:5px solid #007b85;padding-bottom:10px;margin:0 0 18px}h2{color:#007b85;font-size:14pt;border-bottom:1px solid #dbe6ea;padding-bottom:5px;margin:20px 0 8px}p{font-size:10.5pt;margin:5px 0}.item{margin-left:14px;padding:5px 8px;background:#f2f8f9;border-left:3px solid #70ad47}.space{height:8px}.brand{color:#64748b;font-size:9pt;margin-bottom:8px}.footer{margin-top:24px;padding-top:9px;border-top:2px solid #ffb600;color:#64748b;font-size:9pt}</style></head><body><div class="brand">La Movida SST Plus · De la Reacción a la Prevención</div>${content}<div class="footer">www.movidasst.com · Documento generado el ${esc(formatDate(new Date(),true))}</div></body></html>`;
-}
-function downloadShareDocument(doc){
-  const a=document.createElement('a'),url=URL.createObjectURL(new Blob(['\ufeff',doc],{type:'application/msword;charset=utf-8'}));
-  a.href=url;a.download=`plan-familiar-${(state.family||'familia').toLowerCase().replace(/[^a-z0-9]+/gi,'-')}.doc`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+function shareViaWhatsApp(text){
+  const url='https://wa.me/?text='+encodeURIComponent(text),opened=window.open(url,'_blank','noopener,noreferrer');
+  if(!opened)location.href=url;
 }
 async function sharePlan(){
   if(!humans().length){toast('Agrega al menos un integrante antes de compartir el plan');routeTo('family');return}
   const warning='Este plan puede contener nombres, teléfonos, lugares, necesidades y acuerdos privados. Compártelo únicamente con personas de confianza. ¿Deseas continuar?';
   if(!confirm(trText(warning)))return;
-  const text=buildShareText(),doc=buildShareDocument(text),title=trText('Plan Familiar de Emergencia')+(state.family?' · '+state.family:'');
-  try{
-    if(navigator.share){
-      const data={title,text:trText('Adjunto comparto nuestro Plan Familiar de Emergencia.')};
-      try{const file=new File(['\ufeff',doc],`plan-familiar-${(state.family||'familia').toLowerCase().replace(/[^a-z0-9]+/gi,'-')}.doc`,{type:'application/msword'});if(navigator.canShare?.({files:[file]}))data.files=[file];else data.text=text}catch{data.text=text}
-      await navigator.share(data);toast('Plan compartido');
-    }else{downloadShareDocument(doc);toast('Tu dispositivo descargó el documento para que puedas compartirlo')}
-  }catch(error){
-    if(error?.name==='AbortError')return;
-    downloadShareDocument(doc);toast('No se pudo abrir el menú de compartir; descargamos el documento')
+  const text=trText('Adjunto comparto nuestro Plan Familiar de Emergencia.')+'\n\n'+buildShareText(),title=trText('Plan Familiar de Emergencia')+(state.family?' · '+state.family:'');
+  if(navigator.share){
+    try{await navigator.share({title,text});toast('Plan compartido');return}
+    catch(error){if(error?.name==='AbortError')return}
   }
+  shareViaWhatsApp(text);
+  toast('Abrimos WhatsApp para compartir el plan');
 }
 
 function exportPlan(){
