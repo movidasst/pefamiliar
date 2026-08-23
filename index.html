@@ -1129,13 +1129,13 @@ function familyMapSVG(compact=false){
 function more(){
   const versionsText=catalogSource==='Supabase'?'Catálogos actualizados desde Supabase':catalogSource==='caché'?'Catálogos desde copia local':'Catálogos básicos incluidos';
   const ci=countryInfo();
-  return`${pageHead('Más','Privacidad, respaldo, accesibilidad y productos del plan.','home')}<section class="card privacy"><div class="lock">🔒</div><div><h3 style="margin:0;color:var(--navy)">Tu plan es privado</h3><p style="margin:4px 0 0;color:var(--muted);font-size:.78rem">Nombres, teléfonos, medicamentos y acuerdos se guardan en este dispositivo. Supabase solo entrega catálogos públicos; no recibe tu plan familiar.</p></div></section><section class="section card"><div class="section-title"><div><h2>Productos del plan</h2><p>Elige qué necesita tu familia imprimir o guardar como PDF.</p></div></div><div class="grid two"><button class="btn soft" data-print="full">Plan completo</button><button class="btn soft" data-print="quick">Hoja rápida visual</button><button class="btn soft" data-print="cards">Tarjetas individuales</button><button class="btn soft" data-route="map">Mapa lógico familiar</button></div></section><section class="section card"><div class="section-title"><div><h2>Respaldo y versiones</h2><p>Recupera cambios importantes sin crear una cuenta.</p></div></div><div class="grid two"><button class="btn soft" data-action="export">Exportar respaldo</button><button class="btn soft" data-action="import">Importar respaldo</button><button class="btn soft" data-route="versions">Historial de versiones</button><button class="btn danger" data-action="reset">Borrar plan del dispositivo</button></div></section><section class="section card"><div class="section-title"><div><h2>Accesibilidad</h2><p>Ajustes guardados en este dispositivo.</p></div></div><div class="settings-row"><div><strong>Texto más grande</strong><div class="hint">Aumenta el tamaño base sin perder estructura.</div></div><label class="switch"><input id="largeText" type="checkbox" ${state.settings.largeText?'checked':''}><span></span></label></div><div class="settings-row"><div><strong>Contraste reinforced</strong><div class="hint">Reduce efectos decorativos y refuerza bordes.</div></div><label class="switch"><input id="highContrast" type="checkbox" ${state.settings.highContrast?'checked':''}><span></span></label></div></section><section class="section country-banner"><b>${ci.flag} ${ci.layer}</b><p>${ci.note}</p><div class="tags">${ci.sources.map(x=>`<span class="tag gray">${esc(x)}</span>`).join('')}</div><div class="actions"><button class="btn ghost small" data-route="family">Cambiar país</button></div></section><section class="section card"><div class="settings-row"><span>Versión de aplicación</span><strong>${VERSION}</strong></div><div class="settings-row"><span>Fuente de listas</span><strong>${esc(versionsText)}</strong></div><div class="settings-row"><span>Última actualización del plan</span><strong>${new Date(state.updated).toLocaleDateString('es')}</strong></div></section><section class="section card"><h3 style="margin:0;color:var(--navy)">Identificación</h3><p style="font-size:.8rem;color:var(--muted)"><strong>Elaborado por David Linares Brea</strong><br><a href="mailto:info@movidasst.com">info@movidasst.com</a><br><a href="https://wa.me/56968615650" target="_blank" rel="noopener">WhatsApp +56 9 6861 5650</a><br>La Movida SST Plus · www.movidasst.com</p></section>`;
+  return`${pageHead('Más','Privacidad, respaldo, accesibilidad y productos del plan.','home')}<section class="card privacy"><div class="lock">🔒</div><div><h3 style="margin:0;color:var(--navy)">Tu plan es privado</h3><p style="margin:4px 0 0;color:var(--muted);font-size:.78rem">Nombres, teléfonos, medicamentos y acuerdos se guardan en este dispositivo. Supabase solo entrega catálogos públicos; no recibe tu plan familiar.</p></div></section><section class="section card"><div class="section-title"><div><h2>Productos del plan</h2><p>Elige qué necesita tu familia imprimir o guardar como PDF.</p></div></div><div class="grid two"><button class="btn soft" data-print="full">Plan completo</button><button class="btn soft" data-print="quick">Hoja rápida visual</button><button class="btn soft" data-print="cards">Tarjetas individuales</button><button class="btn soft" data-route="map">Mapa lógico familiar</button></div></section><section class="section card"><div class="section-title"><div><h2>Respaldo y versiones</h2><p>Recupera cambios importantes sin crear una cuenta.</p></div></div><div class="grid two"><button class="btn soft" data-action="export">Exportar respaldo</button><button class="btn soft" data-action="import">Importar respaldo</button><button class="btn soft" data-route="versions">Historial de versiones</button><button class="btn danger" data-action="reset">Borrar plan del dispositivo</button></div></section><section class="section card"><div class="section-title"><div><h2>Accesibilidad</h2><p>Ajustes guardados en este dispositivo.</p></div></div><div class="settings-row"><div><strong>Texto más grande</strong><div class="hint">Aumenta el tamaño base sin perder estructura.</div></div><label class="switch"><input id="largeText" type="checkbox" ${state.settings.largeText?'checked':''}><span></span></label></div><div class="settings-row"><div><strong>Contraste reinforced</strong><div class="hint">Reduce efectos decorativos y refuerza bordes.</div></div><label class="switch"><input id="highContrast" type="checkbox" ${state.settings.highContrast?'checked':''}><span></span></label></div></section><section class="section country-banner"><b>${ci.flag} ${ci.layer}</b><p>${ci.note}</p><div class="tags">${ci.sources.map(x=>`<span class="tag gray">${esc(x)}</span>`).join('')}</div><div class="actions"><button class="btn ghost small" data-route="family">Cambiar país</button></div></section><section class="section card"><div class="settings-row"><span>Versión de aplicación</span><strong>${VERSION}</strong></div><div class="settings-row"><span>Fuente de listas</span><strong>${esc(versionsText)}</strong></div><div class="settings-row"><span>Fecha del plan</span><strong>${formatDate(state.planDate)}</strong></div><div class="settings-row"><span>Última actualización del plan</span><strong>${formatDate(state.updated)}</strong></div></section><section class="section card"><h3 style="margin:0;color:var(--navy)">Identificación</h3><p style="font-size:.8rem;color:var(--muted)"><strong>Elaborado por David Linares Brea</strong><br><a href="mailto:info@movidasst.com">info@movidasst.com</a><br><a href="https://wa.me/56968615650" target="_blank" rel="noopener">WhatsApp +56 9 6861 5650</a><br>La Movida SST Plus · www.movidasst.com</p></section>`;
 }
 
 async function versionsPage(){
   const all=(await idbAll('versions')).sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(route!=='versions') return;
-  $('#main').innerHTML=`${pageHead('Historial de versiones','Los últimos 15 puntos de control importantes.','more')}<div class="list">${all.length?all.map(v=>`<div class="item"><div class="itemtop"><div><strong>${esc(v.label)}</strong><p>${new Date(v.date).toLocaleString('es')}</p></div><button class="btn soft small" data-restore="${v.id}">Restaurar</button></div></div>`).join(''):'<div class="empty">Todavía no hay puntos de control guardados.</div>'}</div>`;
+  $('#main').innerHTML=`${pageHead('Historial de versiones','Los últimos 15 puntos de control importantes.','more')}<div class="list">${all.length?all.map(v=>`<div class="item"><div class="itemtop"><div><strong>${esc(v.label)}</strong><p>${formatDate(v.date,true)}</p></div><button class="btn soft small" data-restore="${v.id}">Restaurar</button></div></div>`).join(''):'<div class="empty">Todavía no hay puntos de control guardados.</div>'}</div>`;
   bind();
   localize($('#main'));
   focusMain();
@@ -1198,6 +1198,10 @@ function safeRender(){
   }
 }
 
+function ensureAccessibleLabels(root=document){
+  $$('.field',root).forEach((field,i)=>{const label=field.querySelector(':scope > label'),control=field.querySelector(':scope > input, :scope > select, :scope > textarea');if(label&&control){if(!control.id)control.id='field_'+route+'_'+i;if(!label.htmlFor)label.htmlFor=control.id}});
+  $$('.settings-row input',root).forEach((input,i)=>{if(!input.getAttribute('aria-label'))input.setAttribute('aria-label',input.closest('.settings-row')?.querySelector('strong')?.textContent?.trim()||`Ajuste ${i+1}`)});
+}
 function focusMain(){requestAnimationFrame(()=>{const h=$('#main h1');(h||$('#main')).focus?.({preventScroll:true});scrollTo({top:0,behavior:'instant'})})}
 
 function bind(){
@@ -1232,6 +1236,8 @@ function bind(){
   $$('[data-print]').forEach(b=>b.onclick=()=>printPlan(b.dataset.print));
   $$('[data-restore]').forEach(b=>b.onclick=()=>restoreVersion(b.dataset.restore));
   bindForms();
+  ensureAccessibleLabels(document);
+  $$('#main input, #main select, #main textarea, #overlay input, #overlay select, #overlay textarea').forEach(el=>{el.addEventListener('input',()=>formDirty=true);el.addEventListener('change',()=>formDirty=true)});
 }
 
 function bindForms(){
@@ -1455,6 +1461,7 @@ async function saveDrill(e){
   e.preventDefault();
   const f=new FormData(e.currentTarget);
   state.drills.push({id:uid(),date:new Date().toISOString(),scenario:f.get('scenario'),result:f.get('result'),learning:f.get('learning'),improvement:String(f.get('improvement')||'').trim()});
+  state.drills=state.drills.slice(-50);
   state.lastReview=new Date().toISOString();
   $('#overlay').innerHTML='';
   await saveState('Práctica guardada',true,'Registrar práctica');
@@ -1508,6 +1515,7 @@ async function handleAction(a,e,b){
     const t=$('#simThreat').value, p=$('#simProfile').value, n=$('#simNoData').checked, res=simulationResult(t,p,n);
     $('#simResult').innerHTML=res.html;
     state.simulations.push({id:uid(),date:new Date().toISOString(),scenario:t,scenarioName:threatName(t),profile:p,gaps:res.gaps.length});
+    state.simulations=state.simulations.slice(-50);
     await saveState('',false);
     bind();
   }else if(a==='export') exportPlan();
@@ -1527,13 +1535,20 @@ async function handleAction(a,e,b){
 async function restoreVersion(id){
   const all=await idbAll('versions'), v=all.find(x=>x.id===id);
   if(!v) return;
-  if(confirm(`¿Restaurar la versión “${v.label}” del ${new Date(v.date).toLocaleString('es')}?`)){
+  if(confirm(`¿Restaurar la versión “${v.label}” del ${formatDate(v.date,true)}?`)){
     state=migrate(v.snapshot);
     await saveState('Versión restaurada',true,'Restaurar versión');
     routeTo('home');
   }
 }
 
+function validateImportedPlan(candidate){
+  if(!candidate||typeof candidate!=='object'||Array.isArray(candidate)||!Array.isArray(candidate.members))return false;
+  if(candidate.members.length>50||(candidate.pets?.length||0)>30||(candidate.threats?.length||0)>50)return false;
+  const ids=candidate.members.map(m=>m&&String(m.id||'')).filter(Boolean);if(new Set(ids).size!==ids.length)return false;
+  const stack=[candidate];let seen=0;while(stack.length){const v=stack.pop();if(++seen>15000)return false;if(typeof v==='string'&&v.length>10000)return false;if(v&&typeof v==='object')for(const x of Object.values(v))stack.push(x)}
+  return true;
+}
 function exportPlan(){
   const data=JSON.stringify({type:'PEF-La-Movida',exported:new Date().toISOString(),version:VERSION,state},null,2), a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
@@ -1549,7 +1564,7 @@ $('#importer').onchange=e=>{
   r.onload=async()=>{
     try{
       const o=JSON.parse(r.result), candidate=o.state||o;
-      if(!candidate||typeof candidate!=='object'||!Array.isArray(candidate.members)) throw 0;
+      if(!validateImportedPlan(candidate)) throw 0;
       state=migrate(candidate);
       await saveState('Respaldo importado',true,'Importar respaldo');
       routeTo('home');
@@ -1570,10 +1585,10 @@ function printPlan(mode='full'){
   const quick=`<section class="quick-page"><div class="brand-print"><strong>La Movida SST Plus · Plan rápido</strong><span>De la Reacción a la Prevención</span></div><h1>Flujos de acción por escenario</h1><p>Reconocer → protegerse → ejecutar el acuerdo → reunirse → comunicar. Las instrucciones oficiales prevalecen.</p>${flows}<h2>Qué hace cada integrante si estamos separados</h2>${humans().map(m=>`<h3>${esc(m.name)}</h3><ul>${memberPlaces(m).map(p=>`<li><strong>${esc(p)}:</strong> ${esc(sepText(m,p))}</li>`).join('')}</ul>`).join('')}</section>`;
   const cards=`<section class="wallet-page"><div class="brand-print"><strong>Tarjetas individuales</strong><span>La Movida SST Plus</span></div><div class="wallet-grid">${humans().map(walletCard).join('')}</div></section>`;
   let content='';
-  if(mode==='full') content=`<div class="brand-print"><strong>La Movida SST Plus · Plan Familiar de Emergencia</strong><span>www.movidasst.com</span></div><h1>${state.family?'Familia '+esc(state.family):'Plan Familiar de Emergencia'}</h1><p><strong>Localidad:</strong> ${esc(state.city||'—')} · <strong>País:</strong> ${esc(countryInfo().name)}</p><h2>Integrantes</h2><table><tr><th>Nombre</th><th>Relación</th><th>Principal</th><th>Otros lugares</th><th>Apoyos</th></tr>${memberTable}</table><h2>Evaluación por amenaza</h2>${riskDetails||'<p>Pendiente</p>'}<h2>Reunificación</h2><p><strong>Punto A:</strong> ${esc(state.reunion.pointA||'Pendiente')}<br><strong>Punto B:</strong> ${esc(state.reunion.pointBNA?'No aplica':state.reunion.pointB||'Pendiente')}<br><strong>Regla B:</strong> ${esc(state.reunion.pointRule||'Pendiente')}</p><h2>Roles</h2><p>Coordinación: ${esc(personName(state.roles.coord))} · Comunicación: ${esc(personName(state.roles.comm))} · Kit: ${esc(personName(state.roles.kit))}</p><h2>Comunicación</h2><p>Principal: ${esc(state.communication.primary||'Pendiente')} · Alternativo: ${esc(state.communication.alt||'Pendiente')}<br>Sin comunicación: ${esc(noCommText())}<br>Contacto externo: ${esc(state.communication.externalName||'Pendiente')} ${esc(state.communication.externalPhone||'')}</p><h2>Kit</h2><p>${bs.ready}/${bs.required} elementos requeridos listos.</p><h2>Mapa lógico familiar</h2><div class="print-map">${familyMapSVG(false)}</div><h2>Revisión de coherencia</h2><ul>${coherence().map(x=>`<li><strong>${esc(x.title)}:</strong> ${esc(x.detail)}</li>`).join('')}</ul>${quick}${cards}`;
+  if(mode==='full') content=`<div class="brand-print"><strong>La Movida SST Plus · Plan Familiar de Emergencia</strong><span>www.movidasst.com</span></div><h1>${state.family?'Familia '+esc(state.family):'Plan Familiar de Emergencia'}</h1><p><strong>Fecha del plan:</strong> ${esc(formatDate(state.planDate))} · <strong>Fecha de impresión:</strong> ${esc(formatDate(new Date(),true))}</p><p><strong>Localidad:</strong> ${esc(state.city||'—')} · <strong>País:</strong> ${esc(countryInfo().name)}</p><h2>Integrantes</h2><table><tr><th>Nombre</th><th>Relación</th><th>Principal</th><th>Otros lugares</th><th>Apoyos</th></tr>${memberTable}</table><h2>Evaluación por amenaza</h2>${riskDetails||'<p>Pendiente</p>'}<h2>Reunificación</h2><p><strong>Punto A:</strong> ${esc(state.reunion.pointA||'Pendiente')}<br><strong>Punto B:</strong> ${esc(state.reunion.pointBNA?'No aplica':state.reunion.pointB||'Pendiente')}<br><strong>Regla B:</strong> ${esc(state.reunion.pointRule||'Pendiente')}</p><h2>Roles</h2><p>Coordinación: ${esc(personName(state.roles.coord))} · Comunicación: ${esc(personName(state.roles.comm))} · Kit: ${esc(personName(state.roles.kit))}</p><h2>Comunicación</h2><p>Principal: ${esc(state.communication.primary||'Pendiente')} · Alternativo: ${esc(state.communication.alt||'Pendiente')}<br>Sin comunicación: ${esc(noCommText())}<br>Contacto externo: ${esc(state.communication.externalName||'Pendiente')} ${esc(state.communication.externalPhone||'')}</p><h2>Kit</h2><p>${bs.ready}/${bs.required} elementos requeridos listos.</p><h2>Mapa lógico familiar</h2><div class="print-map">${familyMapSVG(false)}</div><h2>Revisión de coherencia</h2><ul>${coherence().map(x=>`<li><strong>${esc(x.title)}:</strong> ${esc(x.detail)}</li>`).join('')}</ul>${quick}${cards}`;
   if(mode==='quick') content=quick;
   if(mode==='cards') content=cards;
-  $('#print').innerHTML=content+`<p style="font-size:8px;color:#64748b;margin-top:12px">Elaborado por David Linares Brea · info@movidasst.com · WhatsApp +56 9 6861 5650 · www.movidasst.com</p>`;
+  $('#print').innerHTML=content+`<p style="font-size:8px;color:#64748b;margin-top:12px">Fecha de impresión: ${esc(formatDate(new Date(),true))} · Elaborado por David Linares Brea · info@movidasst.com · WhatsApp +56 9 6861 5650 · www.movidasst.com</p>`;
   localize($('#print'));
   window.print();
 }
@@ -1591,6 +1606,7 @@ function walletCard(m){
 }
 
 window.addEventListener('hashchange', safeRender);
+window.addEventListener('beforeunload',e=>{if(formDirty){e.preventDefault();e.returnValue=''}});
 window.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
     if($('#overlay').innerHTML.trim()){
