@@ -400,7 +400,7 @@ body.donation-open { overflow: hidden; }
 (()=>{'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const VERSION='5.3.1';
+const VERSION='5.3.2';
 const KEY='pefamiliar_v5_state', OLD_KEYS=['pefamiliar_v4_state','pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
@@ -985,11 +985,12 @@ function navHtml(){
   });
 }
 
-function countryInfo(){
-  if(COUNTRY[state.country]) return COUNTRY[state.country];
-  const hit=countryList().find(x=>x[0]===state.country), name=state.country==='OTRO'?(state.countryOther||'Otro país'):(hit?.[1]||'Contexto internacional');
-  return{...COUNTRY.GEN, name, flag:hit?.[2]||'🌎', layer:'Capa '+name};
+function countryInfoFor(code=state.country,other=state.countryOther){
+  if(COUNTRY[code]) return COUNTRY[code];
+  const hit=countryList().find(x=>x[0]===code), name=code==='OTRO'?(other||'Otro país'):(hit?.[1]||'Contexto internacional');
+  return{...COUNTRY.GEN,name,flag:hit?.[2]||'🌎',layer:'Contexto internacional'};
 }
+function countryInfo(){return countryInfoFor(state.country,state.countryOther)}
 
 function pageHead(title,sub='',back='plan'){return`<div class="page-head"><div><button class="back" data-route="${back}">← Volver</button><h1 tabindex="-1">${esc(title)}</h1>${sub?`<p>${esc(sub)}</p>`:''}</div></div>`}
 function why(title,body){return`<details class="why"><summary>${esc(title)}</summary><div class="why-body">${body}</div></details>`}
@@ -1011,7 +1012,7 @@ function plan(){const iss=coherence();return`${pageHead('Mi plan en 5 etapas','S
 
 function family(){
   const ci=countryInfo();
-  return`${pageHead('1 · Conocer','Quiénes somos, dónde estamos normalmente y quién necesita apoyo.','home')}<section class="country-banner"><b>${ci.flag} ${ci.layer}</b><p>${ci.note}</p></section><section class="section card"><div class="row"><div class="field"><label>Fecha del plan</label><input id="planDate" type="date" required value="${esc(state.planDate||isoToday())}"></div><div class="field"><label>Nombre o apellido familiar</label><input id="familyName" value="${esc(state.family)}" placeholder="Ej. Linares"></div><div class="field"><label>Ciudad / localidad</label><input id="familyCity" value="${esc(state.city)}" placeholder="Ej. Caracas"></div></div><div class="row"><div class="field"><label>País</label><select id="country">${countryList().map(([c,n,f])=>`<option value="${c}" ${state.country===c?'selected':''}>${f||'🌎'} ${esc(n)}</option>`).join('')}</select></div><div class="field" id="countryOtherWrap" style="display:${state.country==='OTRO'?'block':'none'}"><label>Otro país</label><input id="countryOther" value="${esc(state.countryOther||'')}" placeholder="Escribe el país"></div></div><button class="btn primary" data-action="saveFamilyMeta">Guardar datos generales</button></section>
+  return`${pageHead('1 · Conocer','Quiénes somos, dónde estamos normalmente y quién necesita apoyo.','home')}<section class="country-banner" id="countryBanner"><b id="countryLayer">${ci.flag} ${ci.layer}</b><p id="countryNote">${ci.note}</p></section><section class="section card"><div class="row"><div class="field"><label>Fecha del plan</label><input id="planDate" type="date" required value="${esc(state.planDate||isoToday())}"></div><div class="field"><label>Nombre o apellido familiar</label><input id="familyName" value="${esc(state.family)}" placeholder="Ej. Linares"></div><div class="field"><label>Ciudad / localidad</label><input id="familyCity" value="${esc(state.city)}" placeholder="Ej. Caracas"></div></div><div class="row"><div class="field"><label>País</label><select id="country">${countryList().map(([c,n,f])=>`<option value="${c}" ${state.country===c?'selected':''}>${f||'🌎'} ${esc(n)}</option>`).join('')}</select></div><div class="field" id="countryOtherWrap" style="display:${state.country==='OTRO'?'block':'none'}"><label>Otro país</label><input id="countryOther" value="${esc(state.countryOther||'')}" placeholder="Escribe el país"></div></div><button class="btn primary" data-action="saveFamilyMeta">Guardar datos generales</button></section>
 <section class="section"><div class="section-title"><div><h2>Integrantes</h2><p>Agrega una persona una sola vez; la app la reutiliza después.</p></div><button class="btn soft small" data-route="member">＋ Integrante</button></div><div class="list">${humans().length?humans().map(memberCard).join(''):'<div class="empty">Empieza por las personas que forman parte del plan.</div>'}</div></section>
 <section class="section"><div class="section-title"><div><h2>Mascotas</h2><p>Si no hay mascotas, no genera pendientes.</p></div><button class="btn soft small" data-action="addPet">＋ Mascota</button></div>${hasPets()?`<div class="list">${state.pets.map(p=>`<div class="item"><div class="itemtop"><div><strong>${esc(p.name)}</strong><p>${esc(p.type)}</p></div><button class="btn danger small" data-delpet="${p.id}">Eliminar</button></div></div>`).join('')}</div>`:'<div class="na">No aplica · no hay mascotas registradas.</div>'}</section>
 <section class="section">${why('¿Por qué empezar por la familia?','Porque los roles, el kit y la reunificación cambian según la edad, los lugares y las necesidades reales de cada integrante. La información se reutiliza para evitar pedir lo mismo dos veces.')}</section><div class="wizard-actions"><button class="btn primary" data-action="saveFamilyAndContinue"><span>Continuar</span> · 2 · <span>Identificar</span> →</button></div>`;
@@ -1390,7 +1391,18 @@ function bindForms(){
   const bf=$('#bagForm'); if(bf) bf.onsubmit=saveBag;
   const pf=$('#petForm'); if(pf) pf.onsubmit=savePet;
   const df=$('#drillForm'); if(df) df.onsubmit=saveDrill;
-  const c=$('#country'); if(c) c.onchange=e=>{$('#countryOtherWrap').style.display=e.target.value==='OTRO'?'block':'none'};
+  const c=$('#country'); if(c){
+    const refreshCountryBanner=()=>{
+      const other=$('#countryOther')?.value.trim()||'',ci=countryInfoFor(c.value,other);
+      $('#countryOtherWrap').style.display=c.value==='OTRO'?'block':'none';
+      const layer=$('#countryLayer'),note=$('#countryNote');
+      if(layer)layer.textContent=ci.flag+' '+ci.layer;
+      if(note)note.textContent=ci.note;
+      localize($('#countryBanner'));
+    };
+    c.onchange=refreshCountryBanner;
+    const other=$('#countryOther');if(other)other.oninput=refreshCountryBanner;
+  }
   const lt=$('#largeText'); if(lt) lt.onchange=async e=>{state.settings.largeText=e.target.checked;applySettings();await saveState('Preferencia guardada')};
   const hc=$('#highContrast'); if(hc) hc.onchange=async e=>{state.settings.highContrast=e.target.checked;applySettings();await saveState('Preferencia guardada')};
 }
