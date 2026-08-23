@@ -418,7 +418,7 @@ body.donation-open { overflow: hidden; }
 (()=>{'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const VERSION='5.3.7';
+const VERSION='5.3.8';
 const KEY='pefamiliar_v5_state', OLD_KEYS=['pefamiliar_v4_state','pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
@@ -520,9 +520,13 @@ Object.assign(UI_TRANSLATIONS.en,{"Cambiar idioma":"Change language","Herramient
 Object.assign(UI_TRANSLATIONS.pt,{"Cambiar idioma":"Mudar idioma","Herramienta gratuita":"Ferramenta gratuita","Plan Familiar de Emergencia":"Plano Familiar de Emergência","Plan de la Familia":"Plano da Família","Organiza a tu familia para actuar si ocurre una emergencia, incluso cuando sus integrantes estén en lugares diferentes o fallen las comunicaciones.":"Organize sua família para agir em uma emergência, mesmo quando os integrantes estiverem em locais diferentes ou as comunicações falharem.","Continuar mi plan":"Continuar meu plano","Crear mi plan":"Criar meu plano","Donar":"Doar"});
 Object.assign(UI_TRANSLATIONS.fr,{"Cambiar idioma":"Changer de langue","Herramienta gratuita":"Outil gratuit","Plan Familiar de Emergencia":"Plan familial d’urgence","Plan de la Familia":"Plan de la famille","Organiza a tu familia para actuar si ocurre una emergencia, incluso cuando sus integrantes estén en lugares diferentes o fallen las comunicaciones.":"Organisez votre famille pour agir en cas d’urgence, même lorsque ses membres se trouvent dans des lieux différents ou que les communications sont interrompues.","Continuar mi plan":"Continuer mon plan","Crear mi plan":"Créer mon plan","Donar":"Faire un don"});
 
-Object.assign(UI_TRANSLATIONS.en,{"Compartir mi plan":"Share my plan","Agrega al menos un integrante antes de compartir el plan":"Add at least one family member before sharing the plan","Este plan puede contener nombres, teléfonos, lugares, necesidades y acuerdos privados. Compártelo únicamente con personas de confianza. ¿Deseas continuar?":"This plan may contain names, phone numbers, locations, needs and private agreements. Share it only with people you trust. Do you want to continue?","Adjunto comparto nuestro Plan Familiar de Emergencia.":"I’m sharing our Family Emergency Plan.","Plan compartido":"Plan shared","Tu dispositivo descargó el resumen para que puedas compartirlo":"Your device downloaded the summary so you can share it","No se pudo abrir el menú de compartir; descargamos el resumen":"The share menu could not be opened; the summary was downloaded"});
+Object.assign(UI_TRANSLATIONS.en,{"Compartir mi plan":"Share my plan","Agrega al menos un integrante antes de compartir el plan":"Add at least one family member before sharing the plan","Este plan puede contener nombres, teléfonos, lugares, necesidades y acuerdos privados. Compártelo únicamente con personas de confianza. ¿Deseas continuar?":"This plan may contain names, phone numbers, locations, needs and private agreements. Share it only with people you trust. Do you want to continue?","Adjunto comparto nuestro Plan Familiar de Emergencia.":"I’m sharing our Family Emergency Plan.","Plan compartido":"Plan shared","Tu dispositivo descargó el documento para que puedas compartirlo":"Your device downloaded the summary so you can share it","No se pudo abrir el menú de compartir; descargamos el documento":"The share menu could not be opened; the summary was downloaded"});
 Object.assign(UI_TRANSLATIONS.pt,{"Compartir mi plan":"Compartilhar meu plano","Agrega al menos un integrante antes de compartir el plan":"Adicione pelo menos um integrante antes de compartilhar o plano","Este plan puede contener nombres, teléfonos, lugares, necesidades y acuerdos privados. Compártelo únicamente con personas de confianza. ¿Deseas continuar?":"Este plano pode conter nomes, telefones, locais, necessidades e acordos privados. Compartilhe-o apenas com pessoas de confiança. Deseja continuar?","Adjunto comparto nuestro Plan Familiar de Emergencia.":"Compartilho nosso Plano Familiar de Emergência.","Plan compartido":"Plano compartilhado","Tu dispositivo descargó el resumen para que puedas compartirlo":"Seu dispositivo baixou o resumo para que você possa compartilhá-lo","No se pudo abrir el menú de compartir; descargamos el resumen":"Não foi possível abrir o menu de compartilhamento; o resumo foi baixado"});
 Object.assign(UI_TRANSLATIONS.fr,{"Compartir mi plan":"Partager mon plan","Agrega al menos un integrante antes de compartir el plan":"Ajoutez au moins un membre avant de partager le plan","Este plan puede contener nombres, teléfonos, lugares, necesidades y acuerdos privados. Compártelo únicamente con personas de confianza. ¿Deseas continuar?":"Ce plan peut contenir des noms, des numéros de téléphone, des lieux, des besoins et des accords privés. Partagez-le uniquement avec des personnes de confiance. Voulez-vous continuer ?","Adjunto comparto nuestro Plan Familiar de Emergencia.":"Je partage notre Plan familial d’urgence.","Plan compartido":"Plan partagé","Tu dispositivo descargó el resumen para que puedas compartirlo":"Votre appareil a téléchargé le résumé afin que vous puissiez le partager","No se pudo abrir el menú de compartir; descargamos el resumen":"Le menu de partage n’a pas pu être ouvert ; le résumé a été téléchargé"});
+
+Object.assign(UI_TRANSLATIONS.en,{"Tu dispositivo descargó el documento para que puedas compartirlo":"Your device downloaded the Word document so you can share it","No se pudo abrir el menú de compartir; descargamos el documento":"The share menu could not be opened; the Word document was downloaded"});
+Object.assign(UI_TRANSLATIONS.pt,{"Tu dispositivo descargó el documento para que puedas compartirlo":"Seu dispositivo baixou o documento do Word para que você possa compartilhá-lo","No se pudo abrir el menú de compartir; descargamos el documento":"Não foi possível abrir o menu de compartilhamento; o documento do Word foi baixado"});
+Object.assign(UI_TRANSLATIONS.fr,{"Tu dispositivo descargó el documento para que puedas compartirlo":"Votre appareil a téléchargé le document Word afin que vous puissiez le partager","No se pudo abrir el menú de compartir; descargamos el documento":"Le menu de partage n’a pas pu être ouvert ; le document Word a été téléchargé"});
 
 const TRANSLATION_MATCHERS={};
 function trText(value){
@@ -1716,24 +1720,35 @@ function buildShareText(){
   lines.push('','Las instrucciones oficiales y la protección de la vida prevalecen.','Generado con pefamiliar.movidasst.com · La Movida SST Plus');
   return lines.filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n');
 }
-function downloadShareText(text){
-  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
-  a.href=url;a.download=`plan-familiar-${(state.family||'familia').toLowerCase().replace(/[^a-z0-9]+/gi,'-')}.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+function buildShareDocument(text){
+  const headings=new Set(['PLAN FAMILIAR DE EMERGENCIA · LA MOVIDA SST PLUS','INTEGRANTES Y ACUERDOS','REUNIFICACIÓN','COMUNICACIÓN','PREPARACIÓN']);
+  const content=text.split('\n').map(line=>{
+    const safe=esc(line);
+    if(headings.has(line))return line.startsWith('PLAN ')?`<h1>${safe}</h1>`:`<h2>${safe}</h2>`;
+    if(line.startsWith('• '))return`<p class="item">${safe}</p>`;
+    return line?`<p>${safe}</p>`:'<div class="space"></div>';
+  }).join('');
+  return`<!doctype html><html><head><meta charset="utf-8"><title>${esc(trText('Plan Familiar de Emergencia'))}</title><style>
+  @page{margin:18mm}body{font-family:Arial,sans-serif;color:#334155;line-height:1.45;margin:0}h1{color:#00205b;font-size:24pt;border-bottom:5px solid #007b85;padding-bottom:10px;margin:0 0 18px}h2{color:#007b85;font-size:14pt;border-bottom:1px solid #dbe6ea;padding-bottom:5px;margin:20px 0 8px}p{font-size:10.5pt;margin:5px 0}.item{margin-left:14px;padding:5px 8px;background:#f2f8f9;border-left:3px solid #70ad47}.space{height:8px}.brand{color:#64748b;font-size:9pt;margin-bottom:8px}.footer{margin-top:24px;padding-top:9px;border-top:2px solid #ffb600;color:#64748b;font-size:9pt}</style></head><body><div class="brand">La Movida SST Plus · De la Reacción a la Prevención</div>${content}<div class="footer">www.movidasst.com · Documento generado el ${esc(formatDate(new Date(),true))}</div></body></html>`;
+}
+function downloadShareDocument(doc){
+  const a=document.createElement('a'),url=URL.createObjectURL(new Blob(['\ufeff',doc],{type:'application/msword;charset=utf-8'}));
+  a.href=url;a.download=`plan-familiar-${(state.family||'familia').toLowerCase().replace(/[^a-z0-9]+/gi,'-')}.doc`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 async function sharePlan(){
   if(!humans().length){toast('Agrega al menos un integrante antes de compartir el plan');routeTo('family');return}
   const warning='Este plan puede contener nombres, teléfonos, lugares, necesidades y acuerdos privados. Compártelo únicamente con personas de confianza. ¿Deseas continuar?';
   if(!confirm(trText(warning)))return;
-  const text=buildShareText(),title=trText('Plan Familiar de Emergencia')+(state.family?' · '+state.family:'');
+  const text=buildShareText(),doc=buildShareDocument(text),title=trText('Plan Familiar de Emergencia')+(state.family?' · '+state.family:'');
   try{
     if(navigator.share){
       const data={title,text:trText('Adjunto comparto nuestro Plan Familiar de Emergencia.')};
-      try{const file=new File([text],`plan-familiar-${(state.family||'familia').toLowerCase().replace(/[^a-z0-9]+/gi,'-')}.txt`,{type:'text/plain'});if(navigator.canShare?.({files:[file]}))data.files=[file];else data.text=text}catch{data.text=text}
+      try{const file=new File(['\ufeff',doc],`plan-familiar-${(state.family||'familia').toLowerCase().replace(/[^a-z0-9]+/gi,'-')}.doc`,{type:'application/msword'});if(navigator.canShare?.({files:[file]}))data.files=[file];else data.text=text}catch{data.text=text}
       await navigator.share(data);toast('Plan compartido');
-    }else{downloadShareText(text);toast('Tu dispositivo descargó el resumen para que puedas compartirlo')}
+    }else{downloadShareDocument(doc);toast('Tu dispositivo descargó el documento para que puedas compartirlo')}
   }catch(error){
     if(error?.name==='AbortError')return;
-    downloadShareText(text);toast('No se pudo abrir el menú de compartir; descargamos el resumen')
+    downloadShareDocument(doc);toast('No se pudo abrir el menú de compartir; descargamos el documento')
   }
 }
 
