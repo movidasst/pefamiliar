@@ -210,6 +210,20 @@ a { color: var(--teal); font-weight: 700; text-decoration-thickness: 1px; text-u
 .catalog-group summary { list-style: none; cursor: pointer; padding: 12px; color: var(--navy); font-size: .8rem; font-weight: 800; display: flex; justify-content: space-between; }
 .catalog-group summary::-webkit-details-marker { display: none; }
 .catalog-group .chips { padding: 0 10px 10px; }
+.custom-threats { display: grid; gap: 8px; margin-top: 10px; }
+.custom-threat { display: flex; gap: 9px; align-items: center; justify-content: space-between; padding: 10px 11px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+.custom-threat label { display: flex; gap: 9px; align-items: center; color: var(--navy); font-weight: 750; font-size: .8rem; }
+.threat-evaluations { display: grid; gap: 12px; }
+.threat-eval { border: 1px solid #b8d9dc; border-radius: 19px; background: #fff; overflow: hidden; box-shadow: var(--shadow-sm); }
+.threat-eval > summary { list-style: none; cursor: pointer; padding: 15px; display: flex; gap: 12px; align-items: center; justify-content: space-between; color: var(--navy); font-weight: 850; }
+.threat-eval > summary::-webkit-details-marker { display: none; }
+.threat-eval > summary .tag { flex: 0 0 auto; }
+.threat-eval-body { padding: 0 14px 15px; }
+.risk-block { padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--line); }
+.risk-block:first-child { margin-top: 0; }
+.risk-block h3 { margin: 0 0 4px; color: var(--navy); font-size: .95rem; }
+.risk-block > p { margin: 0 0 10px; color: var(--muted); font-size: .76rem; }
+.linked-risk { border-left: 4px solid var(--yellow); }
 
 .empty { padding: 22px; text-align: center; border: 1px dashed #bfd0d7; border-radius: 19px; color: var(--muted); font-size: .8rem; background: rgba(255,255,255,.66); }
 .na { padding: 11px; border-radius: 15px; background: #f1f5f9; color: #64748b; font-size: .77rem; }
@@ -384,8 +398,8 @@ body.donation-open { overflow: hidden; }
 (()=>{'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const VERSION='4.2.1';
-const KEY='pefamiliar_v4_state', OLD_KEYS=['pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
+const VERSION='5.0.0';
+const KEY='pefamiliar_v5_state', OLD_KEYS=['pefamiliar_v4_state','pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
 const DB_NAME='pefamiliar_v4_db', DB_VERSION=1, CATALOG_KEY='pef_catalog_cache_v2';
@@ -415,6 +429,28 @@ const UI_TRANSLATIONS={
   'De la Reacción a la Prevención':'De la Réaction à la Prévention','Saltar al contenido principal':'Aller au contenu principal','Idioma':'Langue','Ayuda de esta pantalla':'Aide pour cet écran','Abrir plan rápido':'Ouvrir le plan rapide','Navegación principal':'Navigation principale','Inicio':'Accueil','Familia':'Famille','Mi plan':'Mon plan','Practicar':'S’entraîner','Más':'Plus','Volver':'Retour','Continuar':'Continuer','Resolver ahora':'Compléter maintenant','Ver las 5 etapas':'Voir les 5 étapes','Guardar':'Enregistrer','Cancelar':'Annuler','Eliminar':'Supprimer','Editar':'Modifier','Restaurar':'Restaurer','Pendiente':'En attente','Parcial':'Partiel','Listo':'Prêt','No aplica':'Sans objet','Seleccionar':'Sélectionner','Nombre':'Nom','Tipo':'Type','Relación':'Lien','Edad':'Âge','Teléfono':'Téléphone','País':'Pays','Localidad':'Localité','Otro':'Autre','Otra':'Autre','Opcional':'Facultatif','Sí':'Oui','No':'Non','Principal':'Principal','Suplente':'Remplaçant','Contacto':'Contact','Comunicación':'Communication','Amenazas':'Dangers','Vulnerabilidades':'Vulnérabilités','Capacidades':'Capacités','Integrantes':'Membres de la famille','Apoyos':'Soutiens','Roles':'Rôles','Reunificación':'Regroupement','Preparar':'Préparer','Práctica':'Exercice','Kit':'Kit','Punto A':'Point A','Punto B':'Point B','Nuestro plan':'Notre plan','Tu familia':'Votre famille','empieza aquí':'commence ici','acuerdo principal':'accord principal','respaldo':'soutien','adaptado':'adapté','Lugar pendiente':'Lieu en attente','Plan Familiar de Emergencia':'Plan Familial d’Urgence','Herramienta educativa de preparación familiar. Las instrucciones de autoridades y responsables del lugar prevalecen.':'Outil éducatif de préparation familiale. Les consignes des autorités et des responsables du lieu prévalent.','Elaborado por':'Créé par','Un plan que todos puedan recordar':'Un plan dont tout le monde peut se souvenir','Conoce, identifica, acuerda, prepara y practica. La aplicación reutiliza lo que tu familia ya declaró y te muestra solo la siguiente decisión útil.':'Connaissez, identifiez, convenez, préparez et entraînez-vous. L’application réutilise les informations déjà saisies et n’affiche que la prochaine décision utile.','Probar nuestro plan':'Tester notre plan','Tu siguiente decisión':'Votre prochaine décision','No necesitas completar todo hoy. Resuelve una decisión clara y el plan queda guardado automáticamente.':'Vous n’avez pas besoin de tout terminer aujourd’hui. Prenez une décision claire et le plan sera enregistré automatiquement.','Avance global':'Progression globale','Etapa':'Étape','de 5':'sur 5','Plan en construcción':'Plan en cours','Decisiones críticas pendientes':'Décisions critiques en attente','Preparado para practicar':'Prêt pour un exercice','Practicado y en mejora continua':'Testé et en amélioration continue','Conocer':'Connaître','Identificar':'Identifier','Acordar':'Convenir','Productos del plan':'Documents du plan','Elige qué necesita tu familia imprimir o guardar como PDF.':'Choisissez ce que votre famille doit imprimer ou enregistrer en PDF.','Plan completo':'Plan complet','Hoja rápida visual':'Fiche visuelle rapide','Tarjetas individuales':'Cartes individuelles','Mapa lógico familiar':'Carte logique familiale','Respaldo y versiones':'Sauvegarde et versions','Recupera cambios importantes sin crear una cuenta.':'Récupérez les modifications importantes sans créer de compte.','Exportar respaldo':'Exporter la sauvegarde','Importar respaldo':'Importer la sauvegarde','Historial de versiones':'Historique des versions','Borrar plan del dispositivo':'Supprimer le plan de l’appareil','Accesibilidad':'Accessibilité','Ajustes guardados en este dispositivo.':'Paramètres enregistrés sur cet appareil.','Texto más grande':'Texte plus grand','Aumenta el tamaño base sin perder estructura.':'Augmente la taille de base sans modifier la structure.','Contraste reforzado':'Contraste renforcé','Reduce efectos decorativos y refuerza bordes.':'Réduit les effets décoratifs et renforce les bordures.','Cambiar país':'Changer de pays','Versión de aplicación':'Version de l’application','Fuente de listas':'Source des listes','Última actualización del plan':'Dernière mise à jour du plan','Identificación':'Identification','Tu plan es privado':'Votre plan est privé','Nombres, teléfonos, medicamentos y acuerdos se guardan en este dispositivo. Supabase solo entrega catálogos públicos; no recibe tu plan familiar.':'Les noms, téléphones, médicaments et accords sont stockés sur cet appareil. Supabase fournit uniquement les catalogues publics et ne reçoit pas votre plan familial.','Ayuda contextual':'Aide contextuelle','¿Por qué importa?':'Pourquoi est-ce important ?','Cerrar ayuda':'Fermer l’aide','Cerrar modo rápido':'Fermer le mode rapide','Nueva mascota':'Nouvel animal','Guardar mascota':'Enregistrer l’animal','Registrar práctica':'Enregistrer un exercice','Lo importante es detectar mejoras.':'L’important est d’identifier les améliorations.','Escenario':'Scénario','Resultado':'Résultat','Principal aprendizaje':'Principal enseignement','Acción de mejora':'Action d’amélioration','Guardar práctica':'Enregistrer l’exercice','Satisfactorio':'Satisfaisant','Parcialmente satisfactorio':'Partiellement satisfaisant','Necesita mejora':'À améliorer','Plan rápido':'Plan rapide','PLAN RÁPIDO FAMILIAR':'PLAN FAMILIAL RAPIDE','Primero protege tu vida y sigue las instrucciones oficiales o del lugar donde estés.':'Protégez d’abord votre vie et suivez les consignes officielles ou celles du lieu où vous vous trouvez.','SI NO HAY COMUNICACIÓN':'SI LES COMMUNICATIONS SONT COUPÉES','CONTACTO EXTERNO':'CONTACT HORS ZONE','Llamar':'Appeler','No hay integrantes registrados.':'Aucun membre de la famille enregistré.','Qué hace cada integrante si estamos separados':'Ce que chacun fait si nous sommes séparés','Primero protégete y sigue las instrucciones oficiales o del lugar donde estés.':'Protégez-vous d’abord et suivez les consignes officielles ou celles du lieu où vous vous trouvez.','No pudimos mostrar esta pantalla':'Impossible d’afficher cet écran','Tu plan sigue guardado. Puedes volver al inicio o exportar un respaldo desde Más.':'Votre plan est toujours enregistré. Vous pouvez revenir à l’accueil ou exporter une sauvegarde depuis Plus.','Volver al inicio':'Retour à l’accueil','Abrir Más':'Ouvrir Plus','Guardar cambios':'Enregistrer les modifications','Agregar integrante':'Ajouter un membre','Agregar mascota':'Ajouter un animal','Medicamentos de uso continuo':'Médicaments continus','Silla de ruedas':'Fauteuil roulant','Bastón / andador':'Canne / déambulateur','Embarazo':'Grossesse','Niño/a pequeño/a':'Jeune enfant','Adulto mayor':'Personne âgée','Sismo':'Séisme','Incendio':'Incendie','Inundación':'Inondation','Deslizamiento':'Glissement de terrain','Interrupción de servicios':'Coupure des services','Emergencia tecnológica':'Urgence technologique','Evento meteorológico':'Événement météorologique','Otra amenaza':'Autre danger','Casa':'Maison','Trabajo':'Travail','Escuela / colegio':'École','Universidad / instituto':'Université / institut','Guardería':'Crèche','Radio':'Radio','Linterna':'Lampe de poche','Agua':'Eau','Botiquín':'Trousse de secours','Efectivo':'Espèces','Copias de documentos':'Copies de documents','Alimentos no perecederos':'Aliments non périssables','Baterías / power bank':'Piles / batterie externe','Copias de llaves':'Double des clés','Permanecer en lugar seguro':'Rester dans un lieu sûr','Evacuar / desplazarse':'Évacuer / se déplacer','Seguir instrucciones oficiales':'Suivre les consignes officielles','Depende de las condiciones':'Selon les conditions','Permanecer en el lugar hasta reunificación autorizada':'Rester sur place jusqu’au regroupement autorisé','Ir al Punto A si es seguro':'Aller au Point A si cela est sûr','Ir al Punto B si el Punto A no es accesible':'Aller au Point B si le Point A est inaccessible','Regresar a casa solo si la ruta es segura':'Rentrer à la maison seulement si l’itinéraire est sûr'
  }
 };
+
+Object.assign(UI_TRANSLATIONS.en,{
+ 'Evaluación por amenaza':'Assessment by hazard','Amenazas pertinentes':'Relevant hazards','Amenazas adicionales':'Additional hazards','Agregar amenaza':'Add hazard','Actualizar selección':'Update selection','Evaluar cada amenaza':'Assess each hazard','Evaluación completa':'Assessment complete','Evaluación pendiente':'Assessment pending','Condiciones que pueden aumentar el impacto frente a esta amenaza.':'Conditions that may increase the impact of this hazard.','Recursos, conocimientos y redes útiles frente a esta amenaza.':'Resources, knowledge and networks useful for this hazard.','Vulnerabilidades adicionales':'Additional vulnerabilities','Capacidades adicionales':'Additional capacities','Una por línea.':'One per line.','Brechas o mejoras prioritarias':'Priority gaps or improvements','Acciones de preparación específicas':'Specific preparedness actions','Respuesta general':'General response','Observaciones':'Notes','Guardar evaluaciones y continuar':'Save assessments and continue','No identificamos vulnerabilidades para esta amenaza / No aplica':'No vulnerabilities identified for this hazard / Not applicable','Aún no identificamos capacidades para esta amenaza':'No capacities identified for this hazard yet','Preparación derivada de las amenazas':'Preparedness derived from hazards','Acuerdos generales para todas las amenazas':'General agreements for all hazards','Se combinan con la evaluación específica cuando pruebas un escenario.':'They are combined with the specific assessment when you test a scenario.'
+});
+Object.assign(UI_TRANSLATIONS.pt,{
+ 'Evaluación por amenaza':'Avaliação por ameaça','Amenazas pertinentes':'Ameaças relevantes','Amenazas adicionales':'Ameaças adicionais','Agregar amenaza':'Adicionar ameaça','Actualizar selección':'Atualizar seleção','Evaluar cada amenaza':'Avaliar cada ameaça','Evaluación completa':'Avaliação concluída','Evaluación pendiente':'Avaliação pendente','Condiciones que pueden aumentar el impacto frente a esta amenaza.':'Condições que podem aumentar o impacto desta ameaça.','Recursos, conocimientos y redes útiles frente a esta amenaza.':'Recursos, conhecimentos e redes úteis para esta ameaça.','Vulnerabilidades adicionales':'Vulnerabilidades adicionais','Capacidades adicionales':'Capacidades adicionais','Una por línea.':'Uma por linha.','Brechas o mejoras prioritarias':'Lacunas ou melhorias prioritárias','Acciones de preparación específicas':'Ações específicas de preparação','Respuesta general':'Resposta geral','Observaciones':'Observações','Guardar evaluaciones y continuar':'Salvar avaliações e continuar','No identificamos vulnerabilidades para esta amenaza / No aplica':'Não identificamos vulnerabilidades para esta ameaça / Não se aplica','Aún no identificamos capacidades para esta amenaza':'Ainda não identificamos capacidades para esta ameaça','Preparación derivada de las amenazas':'Preparação derivada das ameaças','Acuerdos generales para todas las amenazas':'Acordos gerais para todas as ameaças','Se combinan con la evaluación específica cuando pruebas un escenario.':'Eles são combinados com a avaliação específica ao testar um cenário.'
+});
+Object.assign(UI_TRANSLATIONS.fr,{
+ 'Evaluación por amenaza':'Évaluation par danger','Amenazas pertinentes':'Dangers pertinents','Amenazas adicionales':'Dangers supplémentaires','Agregar amenaza':'Ajouter un danger','Actualizar selección':'Mettre à jour la sélection','Evaluar cada amenaza':'Évaluer chaque danger','Evaluación completa':'Évaluation terminée','Evaluación pendiente':'Évaluation en attente','Condiciones que pueden aumentar el impacto frente a esta amenaza.':'Conditions pouvant accroître les conséquences de ce danger.','Recursos, conocimientos y redes útiles frente a esta amenaza.':'Ressources, connaissances et réseaux utiles face à ce danger.','Vulnerabilidades adicionales':'Vulnérabilités supplémentaires','Capacidades adicionales':'Capacités supplémentaires','Una por línea.':'Une par ligne.','Brechas o mejoras prioritarias':'Lacunes ou améliorations prioritaires','Acciones de preparación específicas':'Actions de préparation spécifiques','Respuesta general':'Réponse générale','Observaciones':'Observations','Guardar evaluaciones y continuar':'Enregistrer les évaluations et continuer','No identificamos vulnerabilidades para esta amenaza / No aplica':'Aucune vulnérabilité identifiée pour ce danger / Sans objet','Aún no identificamos capacidades para esta amenaza':'Aucune capacité identifiée pour ce danger pour le moment','Preparación derivada de las amenazas':'Préparation issue des dangers','Acuerdos generales para todas las amenazas':'Accords généraux pour tous les dangers','Se combinan con la evaluación específica cuando pruebas un escenario.':'Ils sont combinés avec l’évaluation spécifique lors du test d’un scénario.'
+});
+Object.assign(UI_TRANSLATIONS.en,{
+ 'Cada amenaza se evalúa con sus propias vulnerabilidades, capacidades, brechas y acciones.':'Each hazard is assessed with its own vulnerabilities, capacities, gaps and actions.','Agrega todas las que no aparezcan en el catálogo.':'Add every hazard that does not appear in the catalog.','Todavía no has agregado amenazas fuera del listado.':'You have not added any hazards outside the list yet.','Ej. incendio forestal':'E.g. wildfire','Selecciona o agrega una amenaza y pulsa “Actualizar selección” para evaluarla.':'Select or add a hazard and press “Update selection” to assess it.','La relación queda guardada y se reutiliza en preparación, simulaciones y PDF.':'The relationship is saved and reused in preparedness, simulations and the PDF.','¿Por qué evaluar una por una?':'Why assess them one by one?','La misma condición puede ser crítica frente a una amenaza y poco relevante frente a otra. Evaluarlas por separado evita listas genéricas y permite definir acciones útiles.':'The same condition may be critical for one hazard and less relevant for another. Assessing them separately avoids generic lists and supports useful actions.','Estas prioridades nacen de la evaluación realizada en el paso 2.':'These priorities come from the assessment completed in step 2.','Evaluación vinculada':'Linked assessment','Acciones específicas':'Specific actions','No registradas':'None recorded','No identificadas':'None identified'
+});
+Object.assign(UI_TRANSLATIONS.pt,{
+ 'Cada amenaza se evalúa con sus propias vulnerabilidades, capacidades, brechas y acciones.':'Cada ameaça é avaliada com suas próprias vulnerabilidades, capacidades, lacunas e ações.','Agrega todas las que no aparezcan en el catálogo.':'Adicione todas as ameaças que não aparecem no catálogo.','Todavía no has agregado amenazas fuera del listado.':'Você ainda não adicionou ameaças fora da lista.','Ej. incendio forestal':'Ex. incêndio florestal','Selecciona o agrega una amenaza y pulsa “Actualizar selección” para evaluarla.':'Selecione ou adicione uma ameaça e pressione “Atualizar seleção” para avaliá-la.','La relación queda guardada y se reutiliza en preparación, simulaciones y PDF.':'A relação é salva e reutilizada na preparação, nas simulações e no PDF.','¿Por qué evaluar una por una?':'Por que avaliar uma por uma?','La misma condición puede ser crítica frente a una amenaza y poco relevante frente a otra. Evaluarlas por separado evita listas genéricas y permite definir acciones útiles.':'A mesma condição pode ser crítica para uma ameaça e pouco relevante para outra. Avaliá-las separadamente evita listas genéricas e permite definir ações úteis.','Estas prioridades nacen de la evaluación realizada en el paso 2.':'Essas prioridades vêm da avaliação realizada na etapa 2.','Evaluación vinculada':'Avaliação vinculada','Acciones específicas':'Ações específicas','No registradas':'Não registradas','No identificadas':'Não identificadas'
+});
+Object.assign(UI_TRANSLATIONS.fr,{
+ 'Cada amenaza se evalúa con sus propias vulnerabilidades, capacidades, brechas y acciones.':'Chaque danger est évalué avec ses propres vulnérabilités, capacités, lacunes et actions.','Agrega todas las que no aparezcan en el catálogo.':'Ajoutez tous les dangers absents du catalogue.','Todavía no has agregado amenazas fuera del listado.':'Vous n’avez pas encore ajouté de danger hors liste.','Ej. incendio forestal':'Ex. feu de forêt','Selecciona o agrega una amenaza y pulsa “Actualizar selección” para evaluarla.':'Sélectionnez ou ajoutez un danger, puis appuyez sur « Mettre à jour la sélection » pour l’évaluer.','La relación queda guardada y se reutiliza en preparación, simulaciones y PDF.':'La relation est enregistrée et réutilisée dans la préparation, les simulations et le PDF.','¿Por qué evaluar una por una?':'Pourquoi les évaluer séparément ?','La misma condición puede ser crítica frente a una amenaza y poco relevante frente a otra. Evaluarlas por separado evita listas genéricas y permite definir acciones útiles.':'Une même condition peut être critique pour un danger et peu pertinente pour un autre. Les évaluer séparément évite les listes génériques et permet de définir des actions utiles.','Estas prioridades nacen de la evaluación realizada en el paso 2.':'Ces priorités proviennent de l’évaluation réalisée à l’étape 2.','Evaluación vinculada':'Évaluation liée','Acciones específicas':'Actions spécifiques','No registradas':'Non enregistrées','No identificadas':'Non identifiées'
+});
+Object.assign(UI_TRANSLATIONS.en,{'Ajustes por integrante y lugar':'Adjustments by member and location','Opcionales. Complementan el acuerdo general cuando esta amenaza requiere una indicación distinta.':'Optional. They complement the general agreement when this hazard requires a different instruction.','Ajuste específico para esta amenaza':'Specific adjustment for this hazard','Ajuste específico:':'Specific adjustment:','Ajustes por amenaza:':'Hazard-specific adjustments:'});
+Object.assign(UI_TRANSLATIONS.pt,{'Ajustes por integrante y lugar':'Ajustes por membro e local','Opcionales. Complementan el acuerdo general cuando esta amenaza requiere una indicación distinta.':'Opcionais. Complementam o acordo geral quando esta ameaça exige uma orientação diferente.','Ajuste específico para esta amenaza':'Ajuste específico para esta ameaça','Ajuste específico:':'Ajuste específico:','Ajustes por amenaza:':'Ajustes por ameaça:'});
+Object.assign(UI_TRANSLATIONS.fr,{'Ajustes por integrante y lugar':'Ajustements par membre et par lieu','Opcionales. Complementan el acuerdo general cuando esta amenaza requiere una indicación distinta.':'Facultatifs. Ils complètent l’accord général lorsque ce danger exige une consigne différente.','Ajuste específico para esta amenaza':'Ajustement spécifique pour ce danger','Ajuste específico:':'Ajustement spécifique :','Ajustes por amenaza:':'Ajustements par danger :'});
 
 function trText(value){
   if(currentLang==='es'||!value)return value;
@@ -469,7 +505,7 @@ const COUNTRY={
 const HELP={
  home:{title:'Tu centro de preparación',body:'Aquí no necesitas recordar todo el plan. La aplicación te muestra la siguiente decisión útil y las brechas que realmente importan.',why:'Un plan familiar es más útil cuando se construye por decisiones y se practica, no cuando solo se llena un documento.'},
  family:{title:'Conocer a la familia',body:'Registra una sola vez a cada persona, sus lugares frecuentes y necesidades. Esa información se reutiliza en roles, apoyos, reunificación, kit y simulaciones.',why:'Evitar reescribir datos reduce errores y carga mental.'},
- identify:{title:'Identificar el contexto',body:'Selecciona amenazas pertinentes, vulnerabilidades reales y capacidades disponibles. No marques opciones “por si acaso” si no aplican.',why:'Amenaza, vulnerabilidad y capacidad deben analizarse juntas para entender el riesgo familiar.'},
+ identify:{title:'Identificar el contexto',body:'Selecciona las amenazas pertinentes y evalúa por separado las vulnerabilidades, capacidades, brechas y acciones de cada una. Puedes agregar opciones que no estén en los catálogos.',why:'La misma condición puede aumentar el riesgo frente a una amenaza y tener poca relevancia frente a otra.'},
  reunion:{title:'Acordar antes de necesitarlo',body:'Define qué hace cada integrante según el lugar donde se encuentre. La regla debe poder ejecutarse incluso si falla la comunicación.',why:'En una emergencia mayor la familia puede estar separada y las redes pueden saturarse.'},
  roles:{title:'Quién hace qué',body:'Distribuye responsabilidades críticas y asigna suplentes cuando exista dependencia.',why:'La redundancia evita que todo el plan dependa de una sola persona.'},
  communication:{title:'Comunicación resiliente',body:'Combina un medio principal, una alternativa y una regla que funcione sin señal. El contacto fuera de la zona es un respaldo.',why:'Una llamada puede fallar; un acuerdo previo sigue funcionando.'},
@@ -491,11 +527,60 @@ const FLOW={
 
 let REMOTE={}, catalogSource='local', db=null, state=null, route='home', routeArg='';
 
-function blank(){return{schema:4,version:VERSION,family:'',city:'',country:'VE',countryOther:'',members:[],pets:[],threats:[],vulns:[],caps:[],riskReview:{vulns:false,caps:false,explicit:false},custom:{threat:'',vuln:'',cap:''},threatPlans:{},reunion:{outsideZone:'',insideNA:false,insideZone:'',pointA:'',pointB:'',pointBNA:false,pointRule:''},separated:{},roles:{coord:'',comm:'',kit:'',utilities:'',pets:'NA'},support:{},communication:{primary:'',alt:'',externalName:'',externalPhone:'',externalOutside:true,noComm:'',noCommOther:''},bag:{},home:{exits:'',shutoffGas:'',shutoffPower:'',shutoffWater:'',safeArea:'',documents:'pending',notes:''},drills:[],simulations:[],lastReview:'',settings:{largeText:false,highContrast:false},updated:new Date().toISOString()}}
+const cleanIds=v=>Array.isArray(v)?[...new Set(v.filter(x=>x!==null&&x!==undefined&&String(x).trim()).map(x=>String(x).toLowerCase()))]:[];
+const cleanNames=v=>Array.isArray(v)?[...new Set(v.map(x=>String(x||'').trim()).filter(Boolean))]:[];
+const splitLines=v=>cleanNames(String(v||'').split(/\r?\n|;/));
+function cleanMemberPlaceActions(raw){
+  const out={};
+  if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
+  for(const[memberId,places]of Object.entries(raw)){
+    if(!places||typeof places!=='object'||Array.isArray(places))continue;
+    const clean={};
+    for(const[place,value]of Object.entries(places)){const text=String(value||'').trim();if(text)clean[place]=text}
+    if(Object.keys(clean).length)out[memberId]=clean;
+  }
+  return out;
+}
+function blankAssessment(){return{vulns:[],caps:[],customVulns:[],customCaps:[],vulnsReviewed:false,capsReviewed:false,response:'',gaps:[],actions:[],memberPlaceActions:{},notes:''}}
+function normalizeAssessment(raw={},legacy={}){
+  const a=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{}, b=blankAssessment();
+  return{
+    ...b,...a,
+    vulns:cleanIds(a.vulns!==undefined?a.vulns:legacy.vulns).filter(x=>x!=='otro'),
+    caps:cleanIds(a.caps!==undefined?a.caps:legacy.caps).filter(x=>x!=='otro'),
+    customVulns:cleanNames(a.customVulns!==undefined?a.customVulns:legacy.customVulns),
+    customCaps:cleanNames(a.customCaps!==undefined?a.customCaps:legacy.customCaps),
+    vulnsReviewed:Boolean(a.vulnsReviewed!==undefined?a.vulnsReviewed:legacy.vulnsReviewed),
+    capsReviewed:Boolean(a.capsReviewed!==undefined?a.capsReviewed:legacy.capsReviewed),
+    response:String(a.response!==undefined?a.response:(legacy.response||'')),
+    gaps:cleanNames(a.gaps),actions:cleanNames(a.actions),memberPlaceActions:cleanMemberPlaceActions(a.memberPlaceActions),notes:String(a.notes||'').trim()
+  };
+}
+function blank(){return{schema:5,version:VERSION,family:'',city:'',country:'VE',countryOther:'',members:[],pets:[],threats:[],customThreats:[],threatAssessments:{},vulns:[],caps:[],riskReview:{vulns:false,caps:false,explicit:false},custom:{threat:'',vuln:'',cap:''},threatPlans:{},reunion:{outsideZone:'',insideNA:false,insideZone:'',pointA:'',pointB:'',pointBNA:false,pointRule:''},separated:{},roles:{coord:'',comm:'',kit:'',utilities:'',pets:'NA'},support:{},communication:{primary:'',alt:'',externalName:'',externalPhone:'',externalOutside:true,noComm:'',noCommOther:''},bag:{},home:{exits:'',shutoffGas:'',shutoffPower:'',shutoffWater:'',safeArea:'',documents:'pending',notes:''},drills:[],simulations:[],lastReview:'',settings:{largeText:false,highContrast:false},updated:new Date().toISOString()}}
+
+function syncLegacyRiskState(target=state){
+  const active=(target.threats||[]).map(t=>target.threatAssessments?.[t]||blankAssessment());
+  target.vulns=[...new Set(active.flatMap(a=>a.vulns||[]))];
+  target.caps=[...new Set(active.flatMap(a=>a.caps||[]))];
+  target.riskReview={
+    vulns:active.length>0&&active.every(a=>a.vulnsReviewed),
+    caps:active.length>0&&active.every(a=>a.capsReviewed),
+    explicit:active.length>0&&active.every(a=>a.vulnsReviewed&&a.capsReviewed)
+  };
+  target.threatPlans=Object.fromEntries(Object.entries(target.threatAssessments||{}).filter(([,a])=>a?.response).map(([id,a])=>[id,a.response]));
+  target.custom={...(target.custom||{}),threat:target.customThreats?.find(x=>x.id==='otra')?.name||target.custom?.threat||'',vuln:active.flatMap(a=>a.customVulns||[])[0]||'',cap:active.flatMap(a=>a.customCaps||[])[0]||''};
+  return target;
+}
+function assessmentFor(id){
+  if(!state.threatAssessments[id]) state.threatAssessments[id]=blankAssessment();
+  return state.threatAssessments[id];
+}
+function threatName(id){return state?.customThreats?.find(x=>x.id===id)?.name||(id==='otra'&&state?.custom?.threat?state.custom.threat:label('amenazas',id))}
+function isCustomThreat(id){return !!state?.customThreats?.some(x=>x.id===id)}
 
 function migrate(o){
   const source=o&&typeof o==='object'&&!Array.isArray(o)?o:{}, b=blank(), x={...b,...source};
-  x.schema=4; x.version=VERSION; x.country=String(source.country||'VE').toUpperCase();
+  x.schema=5; x.version=VERSION; x.country=String(source.country||'VE').toUpperCase();
   x.settings={...b.settings,...(source.settings||{})};
   x.reunion={...b.reunion,...(source.reunion||{})};
   x.roles={...b.roles,...(source.roles||{})};
@@ -503,27 +588,42 @@ function migrate(o){
   x.riskReview={...b.riskReview,...(source.riskReview||{})};
   x.custom={...b.custom,...(source.custom||{})};
   x.home={...b.home,...(source.home||{})};
-  x.threatPlans=Object.fromEntries(Object.entries(source.threatPlans||{}).map(([k,v])=>[String(k).toLowerCase(),v]));
   x.support={...(source.support||{})};
   x.separated={...(source.separated||{})};
   x.bag={...(source.bag||{})};
-  x.threats=Array.isArray(source.threats)?[...new Set(source.threats.filter(v=>v!==null&&v!==undefined).map(v=>String(v).toLowerCase()))]:[];
-  x.vulns=Array.isArray(source.vulns)?[...new Set(source.vulns.filter(v=>v!==null&&v!==undefined).map(v=>String(v).toLowerCase()))]:[];
-  x.caps=Array.isArray(source.caps)?[...new Set(source.caps.filter(v=>v!==null&&v!==undefined).map(v=>String(v).toLowerCase()))]:[];
-  if(!x.threats.length) x.riskReview={...x.riskReview,vulns:false,caps:false,explicit:false};
+  x.threats=cleanIds(source.threats);
+  x.vulns=cleanIds(source.vulns);
+  x.caps=cleanIds(source.caps);
+  x.customThreats=(Array.isArray(source.customThreats)?source.customThreats:[]).filter(v=>v&&typeof v==='object').map(v=>({id:String(v.id||`custom_${uid()}`).toLowerCase(),name:String(v.name||'').trim()})).filter(v=>v.name);
+  if(x.threats.includes('otra')&&!x.customThreats.some(v=>v.id==='otra')) x.customThreats.push({id:'otra',name:String(source.custom?.threat||'Otra amenaza').trim()||'Otra amenaza'});
+  const hasV5Assessments=source.threatAssessments&&typeof source.threatAssessments==='object'&&!Array.isArray(source.threatAssessments), assessments={};
+  if(hasV5Assessments){
+    for(const[id,a]of Object.entries(source.threatAssessments)) assessments[String(id).toLowerCase()]=normalizeAssessment(a);
+  }
+  const legacy={
+    vulns:x.vulns,caps:x.caps,
+    customVulns:source.custom?.vuln?[source.custom.vuln]:[],customCaps:source.custom?.cap?[source.custom.cap]:[],
+    vulnsReviewed:!!source.riskReview?.vulns,capsReviewed:!!source.riskReview?.caps
+  };
+  const oldPlans=Object.fromEntries(Object.entries(source.threatPlans||{}).map(([k,v])=>[String(k).toLowerCase(),v]));
+  for(const t of x.threats){
+    const fallback=hasV5Assessments?{}:{...legacy,response:oldPlans[t]||''};
+    assessments[t]=normalizeAssessment(assessments[t],fallback);
+  }
+  x.threatAssessments=assessments;
   x.members=(Array.isArray(source.members)?source.members:[]).filter(m=>m&&typeof m==='object'&&!Array.isArray(m)).map(m=>{
     const place=m.place||m.usualPlace||'', places=Array.isArray(m.places)?m.places.filter(Boolean):(place?[place]:[]);
     return {
       id:m.id||uid(), name:m.name||'', relation:m.relation||m.role||'', age:m.age||m.ageGroup||'adult',
       place, places:[...new Set([place,...places].filter(Boolean))], placeOther:m.placeOther||'',
-      needs:Array.isArray(m.needs)?[...new Set(m.needs.filter(v=>v!==null&&v!==undefined).map(v=>String(v).toLowerCase()))]:[], needOther:m.needOther||'',
+      needs:cleanIds(m.needs), needOther:m.needOther||'',
       pickup:{primary:m.pickup?.primary||'',backup:m.pickup?.backup||'',institution:m.pickup?.institution||'',phone:m.pickup?.phone||'',notes:m.pickup?.notes||''}
     }
   });
   x.pets=(Array.isArray(source.pets)?source.pets:[]).filter(p=>p&&typeof p==='object'&&!Array.isArray(p));
   x.drills=(Array.isArray(source.drills)?source.drills:[]).filter(d=>d&&typeof d==='object'&&!Array.isArray(d));
   x.simulations=(Array.isArray(source.simulations)?source.simulations:[]).filter(s=>s&&typeof s==='object'&&!Array.isArray(s));
-  return x;
+  return syncLegacyRiskState(x);
 }
 
 function openDB(){
@@ -712,7 +812,7 @@ function suggestedVulns(){
 
 function completeness(){
   const family=humans().length&&humans().every(m=>m.name&&m.relation&&m.place)?100:Math.min(90,humans().length*25);
-  const hasThreats=state.threats.length>0, riskParts=[hasThreats,hasThreats&&state.riskReview.vulns,hasThreats&&state.riskReview.caps,hasThreats&&state.threats.every(t=>state.threatPlans[t])];
+  const hasThreats=state.threats.length>0, activeAssessments=state.threats.map(assessmentFor), riskParts=[hasThreats,hasThreats&&activeAssessments.every(a=>a.vulnsReviewed),hasThreats&&activeAssessments.every(a=>a.capsReviewed),hasThreats&&activeAssessments.every(a=>a.response)];
   const identify=Math.round(riskParts.filter(Boolean).length/riskParts.length*100);
   const reu=!!(state.reunion.pointA&&state.reunion.outsideZone&&(state.reunion.pointB||state.reunion.pointBNA));
   const sep=humans().length>0&&humans().every(m=>memberPlaces(m).every(p=>separatedForPlace(m,p)?.mode));
@@ -748,7 +848,12 @@ function coherence(){
     }
   }
   if(!state.threats.length) add('critical','Amenazas sin identificar','Selecciona solo las amenazas pertinentes para tu contexto.','identify');
-  else for(const t of state.threats) if(!state.threatPlans[t]) add('review',`Respuesta general pendiente: ${label('amenazas',t)}`,'Define si la familia permanece, evacua, sigue instrucción oficial o depende de condiciones.','identify');
+  else for(const t of state.threats){
+    const a=assessmentFor(t), name=threatName(t);
+    if(!a.vulnsReviewed) add('review',`Vulnerabilidades pendientes: ${name}`,'Evalúa las condiciones que pueden aumentar el impacto frente a esta amenaza.','identify');
+    if(!a.capsReviewed) add('review',`Capacidades pendientes: ${name}`,'Evalúa los recursos, conocimientos y redes útiles frente a esta amenaza.','identify');
+    if(!a.response) add('review',`Respuesta general pendiente: ${name}`,'Define si la familia permanece, evacua, sigue instrucción oficial o depende de condiciones.','identify');
+  }
   if(!state.reunion.pointA) add('critical','Punto A pendiente','Define el punto principal de reunificación.','reunion');
   if(state.reunion.pointA&&state.reunion.pointB&&!state.reunion.pointBNA&&state.reunion.pointA.trim().toLowerCase()===state.reunion.pointB.trim().toLowerCase()) add('review','Punto A y Punto B son iguales','El punto alternativo debe ofrecer una opción real si el principal no es accesible.','reunion');
   if(!state.communication.noComm) add('critical','No existe regla sin comunicación','La familia necesita saber qué hacer aunque no funcionen llamadas ni datos.','communication');
@@ -821,7 +926,7 @@ function family(){
   return`${pageHead('1 · Conocer','Quiénes somos, dónde estamos normalmente y quién necesita apoyo.','home')}<section class="country-banner"><b>${ci.flag} ${ci.layer}</b><p>${ci.note}</p></section><section class="section card"><div class="row"><div class="field"><label>Nombre o apellido familiar</label><input id="familyName" value="${esc(state.family)}" placeholder="Ej. Linares"></div><div class="field"><label>Ciudad / localidad</label><input id="familyCity" value="${esc(state.city)}" placeholder="Ej. Caracas"></div></div><div class="row"><div class="field"><label>País</label><select id="country">${countryList().map(([c,n,f])=>`<option value="${c}" ${state.country===c?'selected':''}>${f||'🌎'} ${esc(n)}</option>`).join('')}</select></div><div class="field" id="countryOtherWrap" style="display:${state.country==='OTRO'?'block':'none'}"><label>Otro país</label><input id="countryOther" value="${esc(state.countryOther||'')}" placeholder="Escribe el país"></div></div><button class="btn primary" data-action="saveFamilyMeta">Guardar datos generales</button></section>
 <section class="section"><div class="section-title"><div><h2>Integrantes</h2><p>Agrega una persona una sola vez; la app la reutiliza después.</p></div><button class="btn soft small" data-route="member">＋ Integrante</button></div><div class="list">${humans().length?humans().map(memberCard).join(''):'<div class="empty">Empieza por las personas que forman parte del plan.</div>'}</div></section>
 <section class="section"><div class="section-title"><div><h2>Mascotas</h2><p>Si no hay mascotas, no genera pendientes.</p></div><button class="btn soft small" data-action="addPet">＋ Mascota</button></div>${hasPets()?`<div class="list">${state.pets.map(p=>`<div class="item"><div class="itemtop"><div><strong>${esc(p.name)}</strong><p>${esc(p.type)}</p></div><button class="btn danger small" data-delpet="${p.id}">Eliminar</button></div></div>`).join('')}</div>`:'<div class="na">No aplica · no hay mascotas registradas.</div>'}</section>
-<section class="section">${why('¿Por qué empezar por la familia?','Porque los roles, el kit y la reunificación cambian según la edad, los lugares y las necesidades reales de cada integrante. La información se reutiliza para evitar pedir lo mismo dos veces.')}</section><div class="wizard-actions"><button class="btn primary" data-route="identify"><span>Continuar</span> · 2 · <span>Identificar</span> →</button></div>`;
+<section class="section">${why('¿Por qué empezar por la familia?','Porque los roles, el kit y la reunificación cambian según la edad, los lugares y las necesidades reales de cada integrante. La información se reutiliza para evitar pedir lo mismo dos veces.')}</section><div class="wizard-actions"><button class="btn primary" data-action="saveFamilyAndContinue"><span>Continuar</span> · 2 · <span>Identificar</span> →</button></div>`;
 }
 
 function memberCard(m){
@@ -841,8 +946,8 @@ function memberEditor(){
 <div class="wizard-actions"><button type="button" class="btn ghost" data-route="family">Cancelar</button><button class="btn primary">Guardar integrante</button></div></form>`;
 }
 
-function catalogChecks(code,pairs,selected,prefix){
-  const remote=catItems(code),groups={};
+function catalogChecks(code,pairs,selected,prefix,exclude=[]){
+  const skipped=new Set(exclude.map(x=>String(x).toLowerCase())), remote=catItems(code).filter(x=>!skipped.has(String(x.codigo).toLowerCase())),groups={};
   if(remote.length){
     const known=new Set(remote.map(x=>String(x.codigo).toLowerCase()));
     remote.forEach(x=>{
@@ -862,72 +967,99 @@ function chips(pairs,selected,prefix){
 
 function threatPlanFields(ids){
   if(!ids.length) return'<div class="na">Selecciona al menos una amenaza para definir su respuesta general.</div>';
-  return ids.map(id=>`<div class="field"><label>${esc(id==='otra'&&state.custom.threat?state.custom.threat:label('amenazas',id))}</label><select name="tp_${id}"><option value="">Seleccionar respuesta</option>${THREAT_ACTIONS.map(([v,n])=>`<option value="${v}" ${state.threatPlans[id]===v?'selected':''}>${n}</option>`).join('')}</select></div>`).join('');
+  return ids.map(id=>`<div class="field"><label>${esc(threatName(id))}</label><select><option value="">Seleccionar respuesta</option>${THREAT_ACTIONS.map(([v,n])=>`<option value="${v}" ${assessmentFor(id).response===v?'selected':''}>${n}</option>`).join('')}</select></div>`).join('');
 }
 
+function riskAssessmentCard(id,index){
+  const a=assessmentFor(id), complete=a.vulnsReviewed&&a.capsReviewed&&!!a.response, sugs=suggestedVulns();
+  const vulns=preservedPairs('vulnerabilidades',catPairs('vulnerabilidades'),a.vulns).filter(([x])=>x!=='otro');
+  const caps=preservedPairs('capacidades',catPairs('capacidades'),a.caps).filter(([x])=>x!=='otro');
+  const memberFields=humans().length?`<div class="risk-block"><h3>Ajustes por integrante y lugar</h3><p>Opcionales. Complementan el acuerdo general cuando esta amenaza requiere una indicación distinta.</p><div class="list">${humans().map((m,mi)=>`<div class="item"><strong>${esc(m.name)}</strong>${memberPlaces(m).map((p,pi)=>`<div class="field" style="margin-top:8px"><label>${esc(p)}</label><input name="ma_${index}_${mi}_${pi}" value="${esc(a.memberPlaceActions?.[m.id]?.[p]||'')}" placeholder="Ajuste específico para esta amenaza"></div>`).join('')}</div>`).join('')}</div></div>`:'';
+  return`<details class="threat-eval" ${index===0||!complete?'open':''}><summary><span>${index+1} · ${esc(threatName(id))}</span><span class="tag ${complete?'green':'yellow'}">${complete?'Evaluación completa':'Evaluación pendiente'}</span></summary><div class="threat-eval-body">
+  <div class="risk-block"><h3>Vulnerabilidades</h3><p>Condiciones que pueden aumentar el impacto frente a esta amenaza.</p>${sugs.length?`<div class="context" style="margin-bottom:10px"><strong>Sugerencias por lo que ya declaraste:</strong> ${sugs.map(x=>esc(label('vulnerabilidades',x))).join(' · ')}. Confirma únicamente las que correspondan a ${esc(threatName(id))}.</div>`:''}<div id="riskV_${index}">${catalogChecks('vulnerabilidades',vulns,a.vulns,`vl${index}_`,['otro'])}</div><div class="field" style="margin-top:10px"><label>Vulnerabilidades adicionales</label><textarea name="cv_${index}" placeholder="Una por línea.">${esc((a.customVulns||[]).join('\n'))}</textarea></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input name="vna_${index}" type="checkbox" ${a.vulnsReviewed&&!a.vulns.length&&!a.customVulns.length?'checked':''}> No identificamos vulnerabilidades para esta amenaza / No aplica</label></div>
+  <div class="risk-block"><h3>Capacidades</h3><p>Recursos, conocimientos y redes útiles frente a esta amenaza.</p><div id="riskC_${index}">${catalogChecks('capacidades',caps,a.caps,`cp${index}_`,['otro'])}</div><div class="field" style="margin-top:10px"><label>Capacidades adicionales</label><textarea name="cc_${index}" placeholder="Una por línea.">${esc((a.customCaps||[]).join('\n'))}</textarea></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input name="cna_${index}" type="checkbox" ${a.capsReviewed&&!a.caps.length&&!a.customCaps.length?'checked':''}> Aún no identificamos capacidades para esta amenaza</label></div>
+  <div class="risk-block"><div class="field"><label>Respuesta general</label><select name="tp_${index}"><option value="">Seleccionar respuesta</option>${THREAT_ACTIONS.map(([v,n])=>`<option value="${v}" ${a.response===v?'selected':''}>${n}</option>`).join('')}</select></div><div class="field"><label>Brechas o mejoras prioritarias</label><textarea name="gap_${index}" placeholder="Una por línea.">${esc((a.gaps||[]).join('\n'))}</textarea></div><div class="field"><label>Acciones de preparación específicas</label><textarea name="act_${index}" placeholder="Una por línea.">${esc((a.actions||[]).join('\n'))}</textarea></div></div>${memberFields}<div class="risk-block"><div class="field"><label>Observaciones</label><textarea name="note_${index}" placeholder="Opcional">${esc(a.notes||'')}</textarea></div></div>
+  </div></details>`;
+}
+
+function riskActionsSummary(){
+  const rows=state.threats.map(t=>({name:threatName(t),a:assessmentFor(t)})).filter(x=>x.a.actions.length||x.a.gaps.length);
+  if(!rows.length)return'';
+  return`<section class="section"><div class="section-title"><div><h2>Preparación derivada de las amenazas</h2><p>Estas prioridades nacen de la evaluación realizada en el paso 2.</p></div></div><div class="list">${rows.map(x=>`<div class="item linked-risk"><strong>${esc(x.name)}</strong>${x.a.gaps.length?`<p><b>Brechas:</b> ${esc(x.a.gaps.join(' · '))}</p>`:''}${x.a.actions.length?`<p><b>Acciones:</b> ${esc(x.a.actions.join(' · '))}</p>`:''}</div>`).join('')}</div></section>`;
+}
+
+function riskContext(){return state.threats.length?`<div class="context" style="margin-bottom:12px"><strong>Acuerdos generales para todas las amenazas:</strong> ${state.threats.map(t=>esc(threatName(t))).join(' · ')}. Se combinan con la evaluación específica cuando pruebas un escenario.</div>`:''}
+
 function identify(){
-  const sugs=state.riskReview.vulns?[]:suggestedVulns(), initial=[...new Set([...state.vulns,...sugs])], threats=preservedPairs('amenazas',catPairs('amenazas'),state.threats), vulns=preservedPairs('vulnerabilidades',catPairs('vulnerabilidades'),initial), caps=preservedPairs('capacidades',catPairs('capacidades'),state.caps);
-  return`${pageHead('2 · Identificar','Amenazas, vulnerabilidades y capacidades que realmente importan a esta familia.','plan')}<form id="riskForm"><div class="context" style="margin-bottom:12px"><strong>Cómo se calcula esta etapa:</strong> amenazas, vulnerabilidades, capacidades y respuesta general aportan 25% cada una. Sin amenazas seleccionadas, la etapa permanece en 0%.</div><section class="card"><div class="section-title"><div><h2>Amenazas pertinentes</h2><p>No selecciones todas: elige las que razonablemente pueden afectar a tu familia.</p></div></div><div id="ths">${catalogChecks('amenazas',threats,state.threats,'th')}</div><div class="field" id="thOther" style="display:${state.threats.includes('otra')?'block':'none'};margin-top:10px"><label>Otra amenaza</label><input name="threatOther" value="${esc(state.custom.threat)}"></div></section>
-<section class="section card"><div class="section-title"><div><h2>Vulnerabilidades</h2><p>Condiciones que pueden aumentar el impacto.</p></div></div>${sugs.length?`<div class="context"><strong>Sugerencias por lo que ya declaraste:</strong> ${sugs.map(x=>esc(label('vulnerabilidades',x))).join(' · ')}. Puedes desmarcarlas.</div>`:''}<div id="vls">${catalogChecks('vulnerabilidades',vulns,initial,'vl')}</div><div class="field" id="vulOther" style="display:${initial.includes('otro')?'block':'none'};margin-top:10px"><label>Otra vulnerabilidad</label><input name="vulnOther" value="${esc(state.custom.vuln)}"></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="vulNA" type="checkbox" ${state.riskReview.vulns&&!state.vulns.length?'checked':''}> No identifico vulnerabilidades adicionales / No aplica</label></section>
-<section class="section card"><div class="section-title"><div><h2>Capacidades</h2><p>Recursos, conocimientos, redes y medios disponibles hoy.</p></div></div><div id="cps">${catalogChecks('capacidades',caps,state.caps,'cp')}</div><div class="field" id="capOther" style="display:${state.caps.includes('otro')?'block':'none'};margin-top:10px"><label>Otra capacidad</label><input name="capOther" value="${esc(state.custom.cap)}"></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="capNA" type="checkbox" ${state.riskReview.caps&&!state.caps.length?'checked':''}> Aún no identifico capacidades adicionales</label></section>
-<section class="section card" id="thPlans"><div class="section-title"><div><h2>Respuesta general por amenaza</h2><p>La instrucción oficial siempre prevalece.</p></div></div>${threatPlanFields(state.threats)}</section>
-<section class="section">${why('¿Por qué unir amenaza, vulnerabilidad y capacidad?','Porque el mismo evento puede producir consecuencias muy distintas según la vivienda, las personas, los recursos y la red de apoyo. El objetivo no es “tener miedo”, sino reconocer qué decisiones hacen a la familia más preparada.')}</section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="plan">Volver</button><button class="btn primary">Guardar y continuar</button></div></form>`;
+  const customIds=new Set(state.customThreats.map(x=>x.id)), standardSelected=state.threats.filter(x=>!customIds.has(x));
+  const threats=preservedPairs('amenazas',catPairs('amenazas'),standardSelected).filter(([id])=>id!=='otra'&&!customIds.has(id));
+  const customList=state.customThreats.length?`<div class="custom-threats">${state.customThreats.map((x,i)=>`<div class="custom-threat"><label><input type="checkbox" data-custom-threat-select value="${esc(x.id)}" ${state.threats.includes(x.id)?'checked':''}> ${esc(x.name)}</label><button type="button" class="btn danger small" data-delcustomth="${esc(x.id)}">Eliminar</button></div>`).join('')}</div>`:'<div class="na">Todavía no has agregado amenazas fuera del listado.</div>';
+  const assessments=state.threats.length?state.threats.map(riskAssessmentCard).join(''):'<div class="empty">Selecciona o agrega una amenaza y pulsa “Actualizar selección” para evaluarla.</div>';
+  return`${pageHead('2 · Identificar','Cada amenaza se evalúa con sus propias vulnerabilidades, capacidades, brechas y acciones.','plan')}<div class="context" style="margin-bottom:12px"><strong>Cómo se calcula esta etapa:</strong> selección de amenazas y revisión completa de vulnerabilidades, capacidades y respuesta para cada una.</div><section class="card"><div class="section-title"><div><h2>Amenazas pertinentes</h2><p>No selecciones todas: elige las que razonablemente pueden afectar a tu familia.</p></div></div><div id="ths">${catalogChecks('amenazas',threats,standardSelected,'th',['otra'])}</div><div class="risk-block"><h3>Amenazas adicionales</h3><p>Agrega todas las que no aparezcan en el catálogo.</p>${customList}<div class="row" style="margin-top:10px"><div class="field"><label>Otra amenaza</label><input id="customThreatName" placeholder="Ej. incendio forestal"></div><div style="align-self:end"><button type="button" class="btn soft" data-action="addCustomThreat">＋ Agregar amenaza</button></div></div></div><div class="actions"><button type="button" class="btn primary" data-action="updateThreatSelection">Actualizar selección</button></div></section>
+  <form id="riskForm"><section class="section"><div class="section-title"><div><h2>Evaluar cada amenaza</h2><p>La relación queda guardada y se reutiliza en preparación, simulaciones y PDF.</p></div></div><div class="threat-evaluations">${assessments}</div></section><section class="section">${why('¿Por qué evaluar una por una?','La misma condición puede ser crítica frente a una amenaza y poco relevante frente a otra. Evaluarlas por separado evita listas genéricas y permite definir acciones útiles.')}</section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="plan">Volver</button><button class="btn primary">Guardar evaluaciones y continuar</button></div></form>`;
 }
 
 function reunion(){
   if(!humans().length) return`${pageHead('3 · Acordar','Primero necesitamos conocer a la familia.','plan')}<div class="empty">Agrega integrantes antes de definir reunificación.<div class="actions" style="justify-content:center"><button class="btn primary" data-route="family">Ir a Familia</button></div></div>`;
-  return`${pageHead('3 · Acordar','Define puntos, acciones por lugar y reglas que puedan ejecutarse sin improvisar.','plan')}<form id="reunionForm"><section class="card"><div class="section-title"><div><h2>Puntos y zonas</h2><p>Un principal y un alternativo cuando sea razonable.</p></div></div><div class="field"><label>Zona exterior segura</label><input name="outsideZone" value="${esc(state.reunion.outsideZone)}" placeholder="Ej. área abierta acordada"></div><div class="row"><div class="field"><label>Punto A · principal</label><input name="pointA" value="${esc(state.reunion.pointA)}" required placeholder="Lugar claro y reconocible"></div><div class="field"><label>Punto B · alternativo</label><select name="pointBMode"><option value="yes" ${!state.reunion.pointBNA?'selected':''}>Definir alternativo</option><option value="na" ${state.reunion.pointBNA?'selected':''}>No aplica</option></select><input style="margin-top:7px" name="pointB" value="${esc(state.reunion.pointB)}" placeholder="Alternativo"></div></div><div class="field"><label>¿Cuándo usamos el Punto B?</label><input name="pointRule" value="${esc(state.reunion.pointRule||'')}" placeholder="Ej. si el Punto A no es accesible o el sector está evacuado"></div>${why('¿Por qué dos puntos?','El punto alternativo sirve cuando el principal no puede alcanzarse con seguridad. Debe ser realmente diferente y la familia debe saber cuándo usarlo.')}</section>
+  return`${pageHead('3 · Acordar','Define puntos, acciones por lugar y reglas que puedan ejecutarse sin improvisar.','plan')}${riskContext()}<form id="reunionForm"><section class="card"><div class="section-title"><div><h2>Puntos y zonas</h2><p>Un principal y un alternativo cuando sea razonable.</p></div></div><div class="field"><label>Zona exterior segura</label><input name="outsideZone" value="${esc(state.reunion.outsideZone)}" placeholder="Ej. área abierta acordada"></div><div class="row"><div class="field"><label>Punto A · principal</label><input name="pointA" value="${esc(state.reunion.pointA)}" required placeholder="Lugar claro y reconocible"></div><div class="field"><label>Punto B · alternativo</label><select name="pointBMode"><option value="yes" ${!state.reunion.pointBNA?'selected':''}>Definir alternativo</option><option value="na" ${state.reunion.pointBNA?'selected':''}>No aplica</option></select><input style="margin-top:7px" name="pointB" value="${esc(state.reunion.pointB)}" placeholder="Alternativo"></div></div><div class="field"><label>¿Cuándo usamos el Punto B?</label><input name="pointRule" value="${esc(state.reunion.pointRule||'')}" placeholder="Ej. si el Punto A no es accesible o el sector está evacuado"></div>${why('¿Por qué dos puntos?','El punto alternativo sirve cuando el principal no puede alcanzarse con seguridad. Debe ser realmente diferente y la familia debe saber cuándo usarlo.')}</section>
 <section class="section"><div class="section-title"><div><h2>Si estamos separados</h2><p>La decisión cambia según dónde esté cada integrante.</p></div></div><div class="list">${humans().map(m=>`<div class="card"><h3 style="margin:0;color:var(--navy)">${esc(m.name)}</h3><p class="hint">Lugar principal: ${esc(m.place||'Pendiente')}</p>${memberPlaces(m).map((p,i)=>{const a=separatedForPlace(m,p)||{};return`<div class="field" style="padding:10px;border:1px solid var(--line);border-radius:15px"><label>📍 ${esc(p)}${p===m.place?' · principal':''}</label><select name="sep_${m.id}_${i}"><option value="">Seleccionar acuerdo</option>${SEP_ACTIONS.map(([v,n])=>`<option value="${v}" ${a.mode===v?'selected':''}>${n}</option>`).join('')}</select><input style="margin-top:7px" name="sepOther_${m.id}_${i}" value="${esc(a.other||'')}" placeholder="Solo si eliges Otro"></div>`}).join('')}</div>`).join('')}</div></section>
 <div class="wizard-actions"><button type="button" class="btn ghost" data-route="identify">Volver</button><button class="btn primary">Guardar acuerdos</button></div></form><section class="section grid two"><button class="btn soft" data-route="roles">Continuar a apoyos y roles</button><button class="btn soft" data-route="communication">Continuar a comunicación</button></section>`;
 }
 
 function roles(){
   const need=humans().filter(m=>(m.needs||[]).length);
-  return`${pageHead('Apoyos y roles','Distribuye responsabilidades y evita depender de una sola persona.','reunion')}<form id="rolesForm"><section class="card"><div class="row"><div class="field"><label>Coordinación general</label><select name="coord">${personOptions(state.roles.coord)}</select></div><div class="field"><label>Comunicación</label><select name="comm">${personOptions(state.roles.comm)}</select></div></div><div class="row"><div class="field"><label>Kit familiar</label><select name="kit">${personOptions(state.roles.kit)}</select></div><div class="field"><label>Servicios de la vivienda</label><select name="utilities">${personOptions(state.roles.utilities,true)}</select></div></div>${hasPets()?`<div class="field"><label>Mascotas</label><select name="pets">${personOptions(state.roles.pets)}</select></div>`:'<div class="na">Mascotas · No aplica automáticamente.</div>'}</section><section class="section"><div class="section-title"><div><h2>Apoyos individuales</h2><p>Solo aparecen personas con necesidades registradas.</p></div></div>${need.length?`<div class="list">${need.map(m=>{const a=state.support[m.id]||{};return`<div class="card"><h3 style="margin:0;color:var(--navy)">${esc(m.name)}</h3><div class="tags">${(m.needs||[]).map(n=>`<span class="tag">${esc(label('necesidades_apoyo',n))}</span>`).join('')}</div><div class="field" style="margin-top:10px"><label>Modalidad</label><select name="mode_${m.id}"><option value="">Seleccionar</option><option value="self" ${a.mode==='self'?'selected':''}>Autónomo/a · no requiere persona asignada</option><option value="assigned" ${a.mode==='assigned'?'selected':''}>Requiere persona de apoyo</option></select></div><div class="row"><div class="field"><label>Principal</label><select name="primary_${m.id}">${personOptions(a.primary||'',true,m.id)}</select></div><div class="field"><label>Suplente</label><select name="backup_${m.id}">${personOptions(a.backup||'',true,m.id)}</select></div></div></div>`}).join('')}</div>`:'<div class="na">No aplica · no se registraron necesidades individuales.</div>'}</section><section class="section">${why('¿Por qué distribuir roles?','Una sola persona puede coordinar varias cosas en el día a día, pero durante una emergencia podría no estar disponible. El motor de coherencia te avisará si demasiadas responsabilidades críticas dependen de la misma persona.')}</section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="reunion">Volver</button><button class="btn primary">Guardar roles</button></div></form>`;
+  return`${pageHead('Apoyos y roles','Distribuye responsabilidades y evita depender de una sola persona.','reunion')}${riskContext()}<form id="rolesForm"><section class="card"><div class="row"><div class="field"><label>Coordinación general</label><select name="coord">${personOptions(state.roles.coord)}</select></div><div class="field"><label>Comunicación</label><select name="comm">${personOptions(state.roles.comm)}</select></div></div><div class="row"><div class="field"><label>Kit familiar</label><select name="kit">${personOptions(state.roles.kit)}</select></div><div class="field"><label>Servicios de la vivienda</label><select name="utilities">${personOptions(state.roles.utilities,true)}</select></div></div>${hasPets()?`<div class="field"><label>Mascotas</label><select name="pets">${personOptions(state.roles.pets)}</select></div>`:'<div class="na">Mascotas · No aplica automáticamente.</div>'}</section><section class="section"><div class="section-title"><div><h2>Apoyos individuales</h2><p>Solo aparecen personas con necesidades registradas.</p></div></div>${need.length?`<div class="list">${need.map(m=>{const a=state.support[m.id]||{};return`<div class="card"><h3 style="margin:0;color:var(--navy)">${esc(m.name)}</h3><div class="tags">${(m.needs||[]).map(n=>`<span class="tag">${esc(label('necesidades_apoyo',n))}</span>`).join('')}</div><div class="field" style="margin-top:10px"><label>Modalidad</label><select name="mode_${m.id}"><option value="">Seleccionar</option><option value="self" ${a.mode==='self'?'selected':''}>Autónomo/a · no requiere persona asignada</option><option value="assigned" ${a.mode==='assigned'?'selected':''}>Requiere persona de apoyo</option></select></div><div class="row"><div class="field"><label>Principal</label><select name="primary_${m.id}">${personOptions(a.primary||'',true,m.id)}</select></div><div class="field"><label>Suplente</label><select name="backup_${m.id}">${personOptions(a.backup||'',true,m.id)}</select></div></div></div>`}).join('')}</div>`:'<div class="na">No aplica · no se registraron necesidades individuales.</div>'}</section><section class="section">${why('¿Por qué distribuir roles?','Una sola persona puede coordinar varias cosas en el día a día, pero durante una emergencia podría no estar disponible. El motor de coherencia te avisará si demasiadas responsabilidades críticas dependen de la misma persona.')}</section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="reunion">Volver</button><button class="btn primary">Guardar roles</button></div></form>`;
 }
 
 function communication(){
   const methods=[...new Set([...catNames('medios_comunicacion'),state.communication.primary,state.communication.alt].filter(x=>x&&x!=='NA'))], rules=[...new Set([...catNames('reglas_sin_comunicacion'),state.communication.noComm].filter(Boolean))];
-  return`${pageHead('Comunicación','Un medio principal, una alternativa y una regla que funcione incluso sin señal.','reunion')}<form id="commForm"><section class="card"><div class="row"><div class="field"><label>Medio principal</label><select name="primary"><option value="">Seleccionar</option>${methods.map(x=>`<option ${state.communication.primary===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div><div class="field"><label>Medio alternativo</label><select name="alt"><option value="NA" ${state.communication.alt==='NA'?'selected':''}>No disponible / No aplica</option>${methods.map(x=>`<option ${state.communication.alt===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div></div><div class="field"><label>Si no hay comunicación</label><select name="noComm"><option value="">Seleccionar acuerdo</option>${rules.map(x=>`<option ${state.communication.noComm===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div><div class="field"><label>Otro acuerdo, si aplica</label><input name="noCommOther" value="${esc(state.communication.noCommOther||'')}"></div></section><section class="section card"><div class="section-title"><div><h2>Contacto fuera de la zona</h2><p>Puede no formar parte del hogar.</p></div></div><div class="row"><div class="field"><label>Nombre</label><input name="externalName" value="${esc(state.communication.externalName)}"></div><div class="field"><label>Teléfono</label><input name="externalPhone" inputmode="tel" value="${esc(state.communication.externalPhone)}"></div></div><label style="display:flex;align-items:flex-start;gap:9px"><input type="checkbox" name="externalOutside" ${state.communication.externalOutside?'checked':''}> <span style="font-size:.8rem">Confirmamos que esta persona se encuentra normalmente fuera de nuestra zona inmediata y puede servir como contacto de respaldo.</span></label></section><section class="section">${why('¿Por qué una regla sin comunicación?','Porque la telefonía y los datos pueden saturarse. Una familia que ya acordó “qué hacemos si no logramos hablar” conserva capacidad de actuar sin esperar una llamada.')}</section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="reunion">Volver</button><button class="btn primary">Guardar comunicación</button></div></form>`;
+  return`${pageHead('Comunicación','Un medio principal, una alternativa y una regla que funcione incluso sin señal.','reunion')}${riskContext()}<form id="commForm"><section class="card"><div class="row"><div class="field"><label>Medio principal</label><select name="primary"><option value="">Seleccionar</option>${methods.map(x=>`<option ${state.communication.primary===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div><div class="field"><label>Medio alternativo</label><select name="alt"><option value="NA" ${state.communication.alt==='NA'?'selected':''}>No disponible / No aplica</option>${methods.map(x=>`<option ${state.communication.alt===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div></div><div class="field"><label>Si no hay comunicación</label><select name="noComm"><option value="">Seleccionar acuerdo</option>${rules.map(x=>`<option ${state.communication.noComm===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div><div class="field"><label>Otro acuerdo, si aplica</label><input name="noCommOther" value="${esc(state.communication.noCommOther||'')}"></div></section><section class="section card"><div class="section-title"><div><h2>Contacto fuera de la zona</h2><p>Puede no formar parte del hogar.</p></div></div><div class="row"><div class="field"><label>Nombre</label><input name="externalName" value="${esc(state.communication.externalName)}"></div><div class="field"><label>Teléfono</label><input name="externalPhone" inputmode="tel" value="${esc(state.communication.externalPhone)}"></div></div><label style="display:flex;align-items:flex-start;gap:9px"><input type="checkbox" name="externalOutside" ${state.communication.externalOutside?'checked':''}> <span style="font-size:.8rem">Confirmamos que esta persona se encuentra normalmente fuera de nuestra zona inmediata y puede servir como contacto de respaldo.</span></label></section><section class="section">${why('¿Por qué una regla sin comunicación?','Porque la telefonía y los datos pueden saturarse. Una familia que ya acordó “qué hacemos si no logramos hablar” conserva capacidad de actuar sin esperar una llamada.')}</section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="reunion">Volver</button><button class="btn primary"><span>Guardar</span> y <span>Continuar</span> · 4 · <span>Preparar</span> →</button></div></form>`;
 }
 
 function homeprep(){
-  return`${pageHead('Vivienda y recursos críticos','Ubica lo esencial sin convertir el plan en un plano técnico.','plan')}<form id="homeForm"><section class="card"><div class="field"><label>Salidas utilizables</label><input name="exits" value="${esc(state.home.exits)}" placeholder="Ej. puerta principal + salida posterior"></div><div class="field"><label>Zona segura o protección dentro de la vivienda</label><input name="safeArea" value="${esc(state.home.safeArea)}" placeholder="Según las amenazas pertinentes y orientación oficial"></div><div class="row"><div class="field"><label>Corte de gas</label><input name="gas" value="${esc(state.home.shutoffGas)}" placeholder="Ubicación / responsable"></div><div class="field"><label>Corte eléctrico</label><input name="power" value="${esc(state.home.shutoffPower)}" placeholder="Tablero / responsable"></div></div><div class="field"><label>Corte de agua</label><input name="water" value="${esc(state.home.shutoffWater)}" placeholder="Llave / responsable"></div><div class="field"><label>Notas importantes</label><textarea name="notes" placeholder="Solo información útil para actuar">${esc(state.home.notes)}</textarea></div></section><section class="section">${why('Ayuda visual sin arrastrar','La aplicación evita depender de un editor de planos complejo. El mapa lógico familiar y esta ficha textual pueden entenderse con teclado, lector de pantalla y dispositivos táctiles. Más adelante se puede añadir un plano opcional con alternativa textual.')}</section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="plan">Volver</button><button class="btn primary">Guardar vivienda</button></div></form>`;
+  return`${pageHead('Vivienda y recursos críticos','Ubica lo esencial sin convertir el plan en un plano técnico.','plan')}${riskContext()}${riskActionsSummary()}<form id="homeForm"><section class="card"><div class="field"><label>Salidas utilizables</label><input name="exits" value="${esc(state.home.exits)}" placeholder="Ej. puerta principal + salida posterior"></div><div class="field"><label>Zona segura o protección dentro de la vivienda</label><input name="safeArea" value="${esc(state.home.safeArea)}" placeholder="Según las amenazas pertinentes y orientación oficial"></div><div class="row"><div class="field"><label>Corte de gas</label><input name="gas" value="${esc(state.home.shutoffGas)}" placeholder="Ubicación / responsable"></div><div class="field"><label>Corte eléctrico</label><input name="power" value="${esc(state.home.shutoffPower)}" placeholder="Tablero / responsable"></div></div><div class="field"><label>Corte de agua</label><input name="water" value="${esc(state.home.shutoffWater)}" placeholder="Llave / responsable"></div><div class="field"><label>Notas importantes</label><textarea name="notes" placeholder="Solo información útil para actuar">${esc(state.home.notes)}</textarea></div></section><section class="section">${why('Ayuda visual sin arrastrar','La aplicación evita depender de un editor de planos complejo. El mapa lógico familiar y esta ficha textual pueden entenderse con teclado, lector de pantalla y dispositivos táctiles. Más adelante se puede añadir un plano opcional con alternativa textual.')}</section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="plan">Volver</button><button class="btn primary">Guardar vivienda</button></div></form>`;
 }
 
 function bag(){
   const bs=bagStats(), items=requiredBag();
-  return`${pageHead('4 · Preparar','Un kit adaptado a tu familia, no una lista genérica interminable.','plan')}<form id="bagForm"><section class="card"><div class="status-top"><div class="status-icon">🎒</div><div><h2 style="margin:0;color:var(--navy)">${bs.ready}/${bs.required} elementos listos</h2><p style="margin:3px 0 0;color:var(--muted);font-size:.78rem">Los elementos especiales aparecen por las necesidades que declaraste.</p></div></div><div class="progress" style="margin-top:12px"><i style="width:${bs.pct}%"></i></div></section><section class="section list">${items.map(([id,n])=>{const it=state.bag[id]||{status:'pending',qty:''}, special=!CORE_BAG.some(x=>x[0]===id); return`<div class="item"><div class="row"><div><strong>${esc(n)}</strong><p>${special?'Agregado por el contexto de tu familia':'Base familiar'}</p></div><div><select name="st_${id}"><option value="pending" ${it.status==='pending'?'selected':''}>Pendiente</option><option value="partial" ${it.status==='partial'?'selected':''}>Parcial</option><option value="ready" ${it.status==='ready'?'selected':''}>Listo</option></select><input style="margin-top:6px" name="q_${id}" value="${esc(it.qty||'')}" placeholder="Cantidad / nota"></div></div></div>`}).join('')}</section><section class="section card"><div class="field"><label>Documentos / copias esenciales</label><select name="documents"><option value="pending" ${state.home.documents==='pending'?'selected':''}>Pendiente</option><option value="partial" ${state.home.documents==='partial'?'selected':''}>Parcial</option><option value="ready" ${state.home.documents==='ready'?'selected':''}>Listo</option></select></div><div class="actions"><button type="button" class="btn soft" data-route="homeprep">Revisar vivienda y servicios</button></div></section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="plan">Volver</button><button class="btn primary">Guardar preparación</button></div></form>`;
+  return`${pageHead('4 · Preparar','Un kit adaptado a tu familia, no una lista genérica interminable.','plan')}${riskContext()}${riskActionsSummary()}<form id="bagForm"><section class="card"><div class="status-top"><div class="status-icon">🎒</div><div><h2 style="margin:0;color:var(--navy)">${bs.ready}/${bs.required} elementos listos</h2><p style="margin:3px 0 0;color:var(--muted);font-size:.78rem">Los elementos especiales aparecen por las necesidades que declaraste.</p></div></div><div class="progress" style="margin-top:12px"><i style="width:${bs.pct}%"></i></div></section><section class="section list">${items.map(([id,n])=>{const it=state.bag[id]||{status:'pending',qty:''}, special=!CORE_BAG.some(x=>x[0]===id); return`<div class="item"><div class="row"><div><strong>${esc(n)}</strong><p>${special?'Agregado por el contexto de tu familia':'Base familiar'}</p></div><div><select name="st_${id}"><option value="pending" ${it.status==='pending'?'selected':''}>Pendiente</option><option value="partial" ${it.status==='partial'?'selected':''}>Parcial</option><option value="ready" ${it.status==='ready'?'selected':''}>Listo</option></select><input style="margin-top:6px" name="q_${id}" value="${esc(it.qty||'')}" placeholder="Cantidad / nota"></div></div></div>`}).join('')}</section><section class="section card"><div class="field"><label>Documentos / copias esenciales</label><select name="documents"><option value="pending" ${state.home.documents==='pending'?'selected':''}>Pendiente</option><option value="partial" ${state.home.documents==='partial'?'selected':''}>Parcial</option><option value="ready" ${state.home.documents==='ready'?'selected':''}>Listo</option></select></div><div class="actions"><button type="button" class="btn soft" data-route="homeprep">Revisar vivienda y servicios</button></div></section><div class="wizard-actions"><button type="button" class="btn ghost" data-route="plan">Volver</button><button class="btn primary">Guardar preparación</button></div></form>`;
 }
 
 function practice(){
   const st=planStatus();
-  return`${pageHead('5 · Practicar','Un plan escrito todavía no es un plan probado.','home')}<section class="sim-hero"><h2>🧪 Probar nuestro plan</h2><p>Construye un escenario con los lugares y acuerdos reales de tu familia y descubre brechas sin esperar a un simulacro completo.</p><div class="actions"><button class="btn yellow" data-route="simulation">Iniciar simulación</button></div></section><section class="section status-card status-${st.cls}"><div class="status-top"><div class="status-icon">${st.icon}</div><div><h2>${st.title}</h2><p>${st.text}</p></div></div></section><section class="section"><div class="section-title"><div><h2>Registrar práctica real</h2><p>Evalúa el plan, no la velocidad.</p></div><button class="btn soft small" data-action="newDrill">＋ Práctica</button></div><div class="list">${state.drills.length?state.drills.slice().reverse().map(d=>`<div class="item"><strong>${esc(d.scenario)}</strong><p>${new Date(d.date).toLocaleDateString('es')} · ${esc(d.result)}${d.improvement?' · Mejora: '+esc(d.improvement):''}</p></div>`).join(''):'<div class="empty">Aún no hay ejercicios familiares registrados.</div>'}</div></section><section class="section"><div class="section-title"><div><h2>Simulaciones</h2><p>Pruebas de escritorio realizadas en esta app.</p></div></div><div class="list">${state.simulations.length?state.simulations.slice(-4).reverse().map(x=>`<div class="item"><strong>${esc(x.scenario)}</strong><p>${new Date(x.date).toLocaleDateString('es')} · ${x.gaps} brecha(s) detectada(s)</p></div>`).join(''):'<div class="na">Aún no has probado un escenario.</div>'}</div></section>`;
+  return`${pageHead('5 · Practicar','Un plan escrito todavía no es un plan probado.','home')}${riskContext()}${riskActionsSummary()}<section class="sim-hero"><h2>🧪 Probar nuestro plan</h2><p>Construye un escenario con los lugares y acuerdos reales de tu familia y descubre brechas sin esperar a un simulacro completo.</p><div class="actions"><button class="btn yellow" data-route="simulation">Iniciar simulación</button></div></section><section class="section status-card status-${st.cls}"><div class="status-top"><div class="status-icon">${st.icon}</div><div><h2>${st.title}</h2><p>${st.text}</p></div></div></section><section class="section"><div class="section-title"><div><h2>Registrar práctica real</h2><p>Evalúa el plan, no la velocidad.</p></div><button class="btn soft small" data-action="newDrill">＋ Práctica</button></div><div class="list">${state.drills.length?state.drills.slice().reverse().map(d=>`<div class="item"><strong>${esc(d.scenario)}</strong><p>${new Date(d.date).toLocaleDateString('es')} · ${esc(d.result)}${d.improvement?' · Mejora: '+esc(d.improvement):''}</p></div>`).join(''):'<div class="empty">Aún no hay ejercicios familiares registrados.</div>'}</div></section><section class="section"><div class="section-title"><div><h2>Simulaciones</h2><p>Pruebas de escritorio realizadas en esta app.</p></div></div><div class="list">${state.simulations.length?state.simulations.slice(-4).reverse().map(x=>`<div class="item"><strong>${esc(x.scenarioName||threatName(x.scenario))}</strong><p>${new Date(x.date).toLocaleDateString('es')} · ${x.gaps} brecha(s) detectada(s)</p></div>`).join(''):'<div class="na">Aún no has probado un escenario.</div>'}</div></section>`;
 }
 
 function simulation(){
   const threats=state.threats.length?state.threats:['sismo'];
   const sel=routeArg||threats[0];
-  return`${pageHead('Probar nuestro plan','Una simulación de escritorio basada en los datos de tu propia familia.','practice')}<section class="card"><div class="row"><div class="field"><label>Escenario</label><select id="simThreat">${threats.map(t=>`<option value="${t}" ${sel===t?'selected':''}>${esc(t==='otra'&&state.custom.threat?state.custom.threat:label('amenazas',t))}</option>`).join('')}</select></div><div class="field"><label>Momento</label><select id="simProfile"><option value="day">Día laboral · 2:00 p. m.</option><option value="night">Noche · 2:00 a. m.</option><option value="weekend">Fin de semana · tarde</option></select></div></div><label style="display:flex;gap:8px;align-items:flex-start"><input id="simNoData" type="checkbox" checked> <span style="font-size:.8rem">Simular que llamadas/datos pueden fallar.</span></label><div class="actions"><button class="btn primary" data-action="runSimulation">Ejecutar escenario</button></div></section><div id="simResult"></div><section class="section">${why('Qué estamos probando','La simulación no predice una emergencia ni sustituye instrucciones oficiales. Comprueba si las decisiones que la familia ya tomó son ejecutables cuando cada persona está en un lugar distinto.')}</section>`;
+  return`${pageHead('Probar nuestro plan','Una simulación de escritorio basada en los datos de tu propia familia.','practice')}<section class="card"><div class="row"><div class="field"><label>Escenario</label><select id="simThreat">${threats.map(t=>`<option value="${t}" ${sel===t?'selected':''}>${esc(threatName(t))}</option>`).join('')}</select></div><div class="field"><label>Momento</label><select id="simProfile"><option value="day">Día laboral · 2:00 p. m.</option><option value="night">Noche · 2:00 a. m.</option><option value="weekend">Fin de semana · tarde</option></select></div></div><label style="display:flex;gap:8px;align-items:flex-start"><input id="simNoData" type="checkbox" checked> <span style="font-size:.8rem">Simular que llamadas/datos pueden fallar.</span></label><div class="actions"><button class="btn primary" data-action="runSimulation">Ejecutar escenario</button></div></section><div id="simResult"></div><section class="section">${why('Qué estamos probando','La simulación no predice una emergencia ni sustituye instrucciones oficiales. Comprueba si las decisiones que la familia ya tomó son ejecutables cuando cada persona está en un lugar distinto.')}</section>`;
 }
 
 function simulationResult(threat,profile,noData){
-  const rows=[], gaps=[];
+  const rows=[], gaps=[], assessment=assessmentFor(threat);
   for(const m of humans()){
     let p=m.place;
     if(profile==='night'&&memberPlaces(m).includes('Casa')) p='Casa';
     if(profile==='weekend'){ p=memberPlaces(m).find(x=>/Casa|Actividad deportiva|familiar/i.test(x))||m.place; }
     const a=separatedForPlace(m,p);
-    rows.push({m,p,a});
+    const specific=assessment.memberPlaceActions?.[m.id]?.[p]||'';
+    rows.push({m,p,a,specific});
     if(!a?.mode) gaps.push(`${m.name} no tiene acuerdo para ${p}`);
     if(needsSchool(m)&&/Escuela|colegio|Guardería/i.test(p)&&!m.pickup?.primary) gaps.push(`${m.name} no tiene persona principal de retiro`);
   }
   if(noData&&!state.communication.noComm) gaps.push('No existe una regla para actuar sin comunicación');
   if(!state.reunion.pointA) gaps.push('No está definido el Punto A');
   if(allNeeds().includes('meds')&&state.bag.medicamentos?.status!=='ready') gaps.push('Medicamentos requeridos no figuran listos');
+  if(!assessment.vulnsReviewed) gaps.push(`Falta evaluar vulnerabilidades frente a ${threatName(threat)}`);
+  if(!assessment.capsReviewed) gaps.push(`Falta evaluar capacidades frente a ${threatName(threat)}`);
+  if(!assessment.response) gaps.push(`Falta definir la respuesta general frente a ${threatName(threat)}`);
+  assessment.gaps.forEach(x=>gaps.push(`${threatName(threat)}: ${x}`));
   const flow=FLOW[threat]||FLOW.otra;
+  const vulnNames=[...assessment.vulns.map(v=>label('vulnerabilidades',v)),...assessment.customVulns], capNames=[...assessment.caps.map(c=>label('capacidades',c)),...assessment.customCaps];
+  const response=THREAT_ACTIONS.find(x=>x[0]===assessment.response)?.[1]||'Pendiente';
   return{
-    html:`<section class="section sim-hero"><h2>${flow.icon} ${esc(threat==='otra'&&state.custom.threat?state.custom.threat:label('amenazas',threat))}</h2><p>${esc(flow.signal)} · ${profile==='day'?'Día laboral 2:00 p. m.':profile==='night'?'Noche 2:00 a. m.':'Fin de semana'}</p></section><section class="section"><div class="section-title"><div><h2>Qué haría cada integrante</h2><p>Según los acuerdos guardados.</p></div></div><div class="list">${rows.map(({m,p,a})=>`<div class="item sim-person"><div class="avatar">${esc((m.name||'?').slice(0,1).toUpperCase())}</div><div><b>${esc(m.name)} · ${esc(p)}</b><small>${a?.mode?esc(sepText(m,p)):'⚠️ Acuerdo pendiente para este lugar'}</small></div></div>`).join('')}</div></section><section class="section"><div class="section-title"><div><h2>${gaps.length?'Brechas encontradas':'El escenario tiene respuesta definida'}</h2><p>${gaps.length?'Resuélvelas antes de la práctica real.':'Aun así, practica y observa qué cambia en la realidad.'}</p></div></div><div class="list">${gaps.length?gaps.map(x=>issueHtml({level:'critical',icon:'!',title:x,detail:'Revisar el acuerdo relacionado.',route:'plan'})).join(''):issueHtml({level:'good',icon:'✓',title:'Sin brechas lógicas detectadas',detail:'Pasa a una práctica familiar y registra mejoras.',route:'practice'})}</div></section>`,
+    html:`<section class="section sim-hero"><h2>${flow.icon} ${esc(threatName(threat))}</h2><p>${esc(flow.signal)} · ${profile==='day'?'Día laboral 2:00 p. m.':profile==='night'?'Noche 2:00 a. m.':'Fin de semana'}</p></section><section class="section card linked-risk"><h2 style="margin-top:0">Evaluación vinculada</h2><p><strong>Vulnerabilidades:</strong> ${esc(vulnNames.join(' · ')||'No identificadas / pendiente')}</p><p><strong>Capacidades:</strong> ${esc(capNames.join(' · ')||'No identificadas / pendiente')}</p><p><strong>Respuesta general:</strong> ${esc(response)}</p>${assessment.actions.length?`<p><strong>Acciones específicas:</strong> ${esc(assessment.actions.join(' · '))}</p>`:''}</section><section class="section"><div class="section-title"><div><h2>Qué haría cada integrante</h2><p>Según los acuerdos guardados.</p></div></div><div class="list">${rows.map(({m,p,a,specific})=>`<div class="item sim-person"><div class="avatar">${esc((m.name||'?').slice(0,1).toUpperCase())}</div><div><b>${esc(m.name)} · ${esc(p)}</b><small>${a?.mode?esc(sepText(m,p)):'⚠️ Acuerdo pendiente para este lugar'}</small>${specific?`<small><strong>Ajuste específico:</strong> ${esc(specific)}</small>`:''}</div></div>`).join('')}</div></section><section class="section"><div class="section-title"><div><h2>${gaps.length?'Brechas encontradas':'El escenario tiene respuesta definida'}</h2><p>${gaps.length?'Resuélvelas antes de la práctica real.':'Aun así, practica y observa qué cambia en la realidad.'}</p></div></div><div class="list">${gaps.length?gaps.map(x=>issueHtml({level:'critical',icon:'!',title:x,detail:'Revisar el acuerdo relacionado.',route:'plan'})).join(''):issueHtml({level:'good',icon:'✓',title:'Sin brechas lógicas detectadas',detail:'Pasa a una práctica familiar y registra mejoras.',route:'practice'})}</div></section>`,
     gaps
   };
 }
@@ -995,7 +1127,7 @@ function addPetOverlay(){
 }
 
 function drillOverlay(){
-  const scenarios=state.threats.length?state.threats.map(x=>x==='otra'&&state.custom.threat?state.custom.threat:label('amenazas',x)):['Sismo','Incendio','Evacuación'];
+  const scenarios=state.threats.length?state.threats.map(threatName):['Sismo','Incendio','Evacuación'];
   $('#overlay').innerHTML=`<div style="position:fixed;z-index:120;inset:0;background:rgba(1,17,38,.55);display:flex;align-items:flex-end;justify-content:center" data-action="closeOverlay"><form id="drillForm" class="card" style="width:min(650px,100%);border-radius:28px 28px 0 0;padding:22px" onclick="event.stopPropagation()"><div class="section-title"><div><h2>Registrar práctica</h2><p>Lo importante es detectar mejoras.</p></div><button type="button" class="iconbtn" data-action="closeOverlay">✕</button></div><div class="field"><label>Escenario</label><select name="scenario">${scenarios.map(x=>`<option>${esc(x)}</option>`).join('')}</select></div><div class="field"><label>Resultado</label><select name="result"><option>Satisfactorio</option><option>Parcialmente satisfactorio</option><option>Necesita mejora</option></select></div><div class="field"><label>Principal aprendizaje</label><select name="learning"><option>El punto de encuentro funcionó</option><option>La comunicación funcionó</option><option>La ruta necesita ajustes</option><option>Los roles necesitan ajustes</option><option>El kit necesita ajustes</option><option>Otro</option></select></div><div class="field"><label>Acción de mejora</label><input name="improvement" placeholder="Opcional"></div><button class="btn primary block">Guardar práctica</button></form></div>`;
   bind();
   localize($('#overlay'));
@@ -1049,6 +1181,17 @@ function bind(){
     await saveState('Mascota eliminada',true,'Actualizar familia');
     safeRender();
   });
+  $$('[data-delcustomth]').forEach(b=>b.onclick=async()=>{
+    const id=b.dataset.delcustomth, item=state.customThreats.find(x=>x.id===id);
+    if(!item||!confirm(`¿Eliminar la amenaza adicional “${item.name}” y su evaluación?`))return;
+    captureRiskForm($('#riskForm'));
+    state.customThreats=state.customThreats.filter(x=>x.id!==id);
+    state.threats=state.threats.filter(x=>x!==id);
+    delete state.threatAssessments[id];
+    syncLegacyRiskState();
+    await saveState('Amenaza eliminada',true,'Actualizar amenazas');
+    safeRender();
+  });
   $$('[data-print]').forEach(b=>b.onclick=()=>printPlan(b.dataset.print));
   $$('[data-restore]').forEach(b=>b.onclick=()=>restoreVersion(b.dataset.restore));
   bindForms();
@@ -1082,21 +1225,13 @@ function bindForms(){
 
   const rf=$('#riskForm');
   if(rf){
-    const vna=$('#vulNA'), cna=$('#capNA');
-    const redraw=()=>{
-      $$('#thPlans select[name^=tp_]').forEach(x=>{if(x.value)state.threatPlans[x.name.slice(3)]=x.value});
-      $('#thPlans').innerHTML=`<div class="section-title"><div><h2>Respuesta general por amenaza</h2><p>La instrucción oficial siempre prevalece.</p></div></div>${threatPlanFields($$('#ths input:checked').map(x=>x.value))}`;
-      $('#thOther').style.display=$$('#ths input:checked').some(x=>x.value==='otra')?'block':'none';
-    };
-    const toggleOthers=()=>{
-      $('#vulOther').style.display=$$('#vls input:checked').some(x=>x.value==='otro')?'block':'none';
-      $('#capOther').style.display=$$('#cps input:checked').some(x=>x.value==='otro')?'block':'none';
-    };
-    $$('#ths input').forEach(x=>x.onchange=redraw);
-    $$('#vls input').forEach(x=>x.addEventListener('change',()=>{if(x.checked&&vna)vna.checked=false;toggleOthers()}));
-    $$('#cps input').forEach(x=>x.addEventListener('change',()=>{if(x.checked&&cna)cna.checked=false;toggleOthers()}));
-    if(vna) vna.onchange=e=>{if(e.target.checked)$$('#vls input').forEach(x=>x.checked=false);toggleOthers()};
-    if(cna) cna.onchange=e=>{if(e.target.checked)$$('#cps input').forEach(x=>x.checked=false);toggleOthers()};
+    state.threats.forEach((t,i)=>{
+      const vna=rf.elements[`vna_${i}`], cna=rf.elements[`cna_${i}`], vls=$$(`#riskV_${i} input`), cps=$$(`#riskC_${i} input`);
+      vls.forEach(x=>x.onchange=()=>{if(x.checked&&vna)vna.checked=false});
+      cps.forEach(x=>x.onchange=()=>{if(x.checked&&cna)cna.checked=false});
+      if(vna)vna.onchange=()=>{if(vna.checked)vls.forEach(x=>x.checked=false)};
+      if(cna)cna.onchange=()=>{if(cna.checked)cps.forEach(x=>x.checked=false)};
+    });
     rf.onsubmit=saveRisks;
   }
 
@@ -1164,23 +1299,36 @@ async function saveMember(e){
   routeTo('family');
 }
 
+function captureRiskForm(f){
+  if(!f)return[];
+  const fd=new FormData(f), pending=[];
+  state.threats.forEach((t,i)=>{
+    const vulns=$$(`#riskV_${i} input:checked`,f).map(x=>x.value), caps=$$(`#riskC_${i} input:checked`,f).map(x=>x.value);
+    const customVulns=splitLines(fd.get(`cv_${i}`)), customCaps=splitLines(fd.get(`cc_${i}`));
+    const memberPlaceActions={};
+    humans().forEach((m,mi)=>{
+      const byPlace={};
+      memberPlaces(m).forEach((p,pi)=>{const value=String(fd.get(`ma_${i}_${mi}_${pi}`)||'').trim();if(value)byPlace[p]=value});
+      if(Object.keys(byPlace).length)memberPlaceActions[m.id]=byPlace;
+    });
+    const vulnsReviewed=!!fd.get(`vna_${i}`)||vulns.length>0||customVulns.length>0;
+    const capsReviewed=!!fd.get(`cna_${i}`)||caps.length>0||customCaps.length>0;
+    const response=String(fd.get(`tp_${i}`)||'');
+    state.threatAssessments[t]=normalizeAssessment({vulns,caps,customVulns,customCaps,vulnsReviewed,capsReviewed,response,gaps:splitLines(fd.get(`gap_${i}`)),actions:splitLines(fd.get(`act_${i}`)),memberPlaceActions,notes:String(fd.get(`note_${i}`)||'').trim()});
+    if(!vulnsReviewed)pending.push(`vulnerabilidades de ${threatName(t)}`);
+    if(!capsReviewed)pending.push(`capacidades de ${threatName(t)}`);
+    if(!response)pending.push(`respuesta de ${threatName(t)}`);
+  });
+  syncLegacyRiskState();
+  return pending;
+}
+
 async function saveRisks(e){
   e.preventDefault();
-  const f=e.currentTarget;
-  const threats=$$('#ths input:checked').map(x=>x.value), vulns=$$('#vls input:checked').map(x=>x.value), caps=$$('#cps input:checked').map(x=>x.value);
-  if(!threats.length) return toast('Selecciona al menos una amenaza pertinente antes de guardar esta etapa');
-  state.threats=threats;
-  state.vulns=vulns;
-  state.caps=caps;
-  state.riskReview={vulns:state.vulns.length>0||!!$('#vulNA')?.checked,caps:state.caps.length>0||!!$('#capNA')?.checked,explicit:true};
-  const fd=new FormData(f);
-  state.custom.threat=state.threats.includes('otra')?String(fd.get('threatOther')||'').trim():'';
-  state.custom.vuln=state.vulns.includes('otro')?String(fd.get('vulnOther')||'').trim():'';
-  state.custom.cap=state.caps.includes('otro')?String(fd.get('capOther')||'').trim():'';
-  const np={};
-  state.threats.forEach(t=>{const v=fd.get(`tp_${t}`);if(v)np[t]=v});
-  state.threatPlans=np;
-  await saveState('Contexto guardado',true,'Identificar riesgos');
+  if(!state.threats.length) return toast('Selecciona al menos una amenaza pertinente antes de guardar esta etapa');
+  const pending=captureRiskForm(e.currentTarget);
+  await saveState(pending.length?'Avance guardado':'Evaluaciones guardadas',true,'Evaluar amenazas');
+  if(pending.length){toast(`Completa: ${pending.slice(0,3).join(', ')}${pending.length>3?'…':''}`);return safeRender()}
   routeTo('reunion');
 }
 
@@ -1229,7 +1377,7 @@ async function saveCommunication(e){
   state.communication.externalPhone=String(f.get('externalPhone')||'').trim();
   state.communication.externalOutside=!!f.get('externalOutside');
   await saveState('Comunicación guardada',true,'Definir comunicación');
-  routeTo('plan');
+  routeTo('bag');
 }
 
 async function saveHome(e){
@@ -1282,6 +1430,35 @@ async function handleAction(a,e,b){
     state.countryOther=$('#countryOther')?.value.trim()||'';
     await saveState('Datos generales guardados',true,'Actualizar datos generales');
     safeRender();
+  }else if(a==='saveFamilyAndContinue'){
+    state.family=$('#familyName').value.trim();
+    state.city=$('#familyCity').value.trim();
+    state.country=$('#country').value;
+    state.countryOther=$('#countryOther')?.value.trim()||'';
+    await saveState('Paso 1 guardado',true,'Completar paso 1');
+    routeTo('identify');
+  }else if(a==='addCustomThreat'){
+    const input=$('#customThreatName'), name=input?.value.trim()||'';
+    if(!name)return toast('Escribe el nombre de la amenaza adicional');
+    const exists=[...catPairs('amenazas').map(x=>x[1]),...state.customThreats.map(x=>x.name)].some(x=>String(x).trim().toLowerCase()===name.toLowerCase());
+    if(exists)return toast('Esa amenaza ya está en el listado o fue agregada');
+    const id=`custom_${uid().toLowerCase()}`;
+    captureRiskForm($('#riskForm'));
+    state.customThreats.push({id,name});
+    state.threats.push(id);
+    state.threatAssessments[id]=blankAssessment();
+    syncLegacyRiskState();
+    await saveState('Amenaza agregada',true,'Agregar amenaza');
+    safeRender();
+  }else if(a==='updateThreatSelection'){
+    const standard=$$('#ths input:checked').map(x=>x.value), custom=$$('[data-custom-threat-select]:checked').map(x=>x.value), selected=[...new Set([...standard,...custom])];
+    if(!selected.length)return toast('Selecciona o agrega al menos una amenaza pertinente');
+    captureRiskForm($('#riskForm'));
+    state.threats=selected;
+    state.threats.forEach(assessmentFor);
+    syncLegacyRiskState();
+    await saveState('Selección de amenazas actualizada',true,'Actualizar amenazas');
+    safeRender();
   }else if(a==='addPet') addPetOverlay();
   else if(a==='newDrill') drillOverlay();
   else if(a==='closeOverlay'){ $('#overlay').innerHTML=''; }
@@ -1289,7 +1466,7 @@ async function handleAction(a,e,b){
   else if(a==='runSimulation'){
     const t=$('#simThreat').value, p=$('#simProfile').value, n=$('#simNoData').checked, res=simulationResult(t,p,n);
     $('#simResult').innerHTML=res.html;
-    state.simulations.push({id:uid(),date:new Date().toISOString(),scenario:t,profile:p,gaps:res.gaps.length});
+    state.simulations.push({id:uid(),date:new Date().toISOString(),scenario:t,scenarioName:threatName(t),profile:p,gaps:res.gaps.length});
     await saveState('',false);
     bind();
   }else if(a==='export') exportPlan();
@@ -1344,10 +1521,15 @@ $('#importer').onchange=e=>{
 function printPlan(mode='full'){
   const bs=bagStats(), flows=state.threats.map(flowPrint).join('');
   const memberTable=humans().map(m=>`<tr><td>${esc(m.name)}</td><td>${esc(m.relation)}</td><td>${esc(m.place)}</td><td>${esc(extraPlaces(m).join(', ')||'—')}</td><td>${esc((m.needs||[]).map(n=>label('necesidades_apoyo',n)).join(', ')||'No aplica')}</td></tr>`).join('');
+  const riskDetails=state.threats.map(t=>{
+    const a=assessmentFor(t),vs=[...a.vulns.map(v=>label('vulnerabilidades',v)),...a.customVulns],cs=[...a.caps.map(c=>label('capacidades',c)),...a.customCaps],response=THREAT_ACTIONS.find(x=>x[0]===a.response)?.[1]||'Pendiente';
+    const memberSpecific=humans().flatMap(m=>memberPlaces(m).map(p=>({member:m.name,place:p,text:a.memberPlaceActions?.[m.id]?.[p]||''}))).filter(x=>x.text);
+    return`<h3>${esc(threatName(t))}</h3><table><tr><th>Vulnerabilidades</th><td>${esc(vs.join(' · ')||(a.vulnsReviewed?'No identificadas / No aplica':'Pendiente'))}</td></tr><tr><th>Capacidades</th><td>${esc(cs.join(' · ')||(a.capsReviewed?'No identificadas':'Pendiente'))}</td></tr><tr><th>Respuesta general</th><td>${esc(response)}</td></tr><tr><th>Brechas</th><td>${esc(a.gaps.join(' · ')||'No registradas')}</td></tr><tr><th>Acciones específicas</th><td>${esc(a.actions.join(' · ')||'No registradas')}</td></tr>${memberSpecific.length?`<tr><th>Ajustes por integrante y lugar</th><td>${memberSpecific.map(x=>`<strong>${esc(x.member)} · ${esc(x.place)}:</strong> ${esc(x.text)}`).join('<br>')}</td></tr>`:''}${a.notes?`<tr><th>Observaciones</th><td>${esc(a.notes)}</td></tr>`:''}</table>`;
+  }).join('');
   const quick=`<section class="quick-page"><div class="brand-print"><strong>La Movida SST Plus · Plan rápido</strong><span>De la Reacción a la Prevención</span></div><h1>Flujos de acción por escenario</h1><p>Reconocer → protegerse → ejecutar el acuerdo → reunirse → comunicar. Las instrucciones oficiales prevalecen.</p>${flows}<h2>Qué hace cada integrante si estamos separados</h2>${humans().map(m=>`<h3>${esc(m.name)}</h3><ul>${memberPlaces(m).map(p=>`<li><strong>${esc(p)}:</strong> ${esc(sepText(m,p))}</li>`).join('')}</ul>`).join('')}</section>`;
   const cards=`<section class="wallet-page"><div class="brand-print"><strong>Tarjetas individuales</strong><span>La Movida SST Plus</span></div><div class="wallet-grid">${humans().map(walletCard).join('')}</div></section>`;
   let content='';
-  if(mode==='full') content=`<div class="brand-print"><strong>La Movida SST Plus · Plan Familiar de Emergencia</strong><span>www.movidasst.com</span></div><h1>${state.family?'Familia '+esc(state.family):'Plan Familiar de Emergencia'}</h1><p><strong>Localidad:</strong> ${esc(state.city||'—')} · <strong>País:</strong> ${esc(countryInfo().name)}</p><h2>Integrantes</h2><table><tr><th>Nombre</th><th>Relación</th><th>Principal</th><th>Otros lugares</th><th>Apoyos</th></tr>${memberTable}</table><h2>Amenazas</h2><p>${esc(state.threats.map(t=>label('amenazas',t)).join(' · ')||'Pendiente')}</p><h2>Vulnerabilidades</h2><p>${esc(state.vulns.map(v=>label('vulnerabilidades',v)).join(' · ')||'No identificadas / pendiente de revisión')}</p><h2>Capacidades</h2><p>${esc(state.caps.map(c=>label('capacidades',c)).join(' · ')||'No identificadas / pendiente de revisión')}</p><h2>Reunificación</h2><p><strong>Punto A:</strong> ${esc(state.reunion.pointA||'Pendiente')}<br><strong>Punto B:</strong> ${esc(state.reunion.pointBNA?'No aplica':state.reunion.pointB||'Pendiente')}<br><strong>Regla B:</strong> ${esc(state.reunion.pointRule||'Pendiente')}</p><h2>Roles</h2><p>Coordinación: ${esc(personName(state.roles.coord))} · Comunicación: ${esc(personName(state.roles.comm))} · Kit: ${esc(personName(state.roles.kit))}</p><h2>Comunicación</h2><p>Principal: ${esc(state.communication.primary||'Pendiente')} · Alternativo: ${esc(state.communication.alt||'Pendiente')}<br>Sin comunicación: ${esc(noCommText())}<br>Contacto externo: ${esc(state.communication.externalName||'Pendiente')} ${esc(state.communication.externalPhone||'')}</p><h2>Kit</h2><p>${bs.ready}/${bs.required} elementos requeridos listos.</p><h2>Mapa lógico familiar</h2><div class="print-map">${familyMapSVG(false)}</div><h2>Revisión de coherencia</h2><ul>${coherence().map(x=>`<li><strong>${esc(x.title)}:</strong> ${esc(x.detail)}</li>`).join('')}</ul>${quick}${cards}`;
+  if(mode==='full') content=`<div class="brand-print"><strong>La Movida SST Plus · Plan Familiar de Emergencia</strong><span>www.movidasst.com</span></div><h1>${state.family?'Familia '+esc(state.family):'Plan Familiar de Emergencia'}</h1><p><strong>Localidad:</strong> ${esc(state.city||'—')} · <strong>País:</strong> ${esc(countryInfo().name)}</p><h2>Integrantes</h2><table><tr><th>Nombre</th><th>Relación</th><th>Principal</th><th>Otros lugares</th><th>Apoyos</th></tr>${memberTable}</table><h2>Evaluación por amenaza</h2>${riskDetails||'<p>Pendiente</p>'}<h2>Reunificación</h2><p><strong>Punto A:</strong> ${esc(state.reunion.pointA||'Pendiente')}<br><strong>Punto B:</strong> ${esc(state.reunion.pointBNA?'No aplica':state.reunion.pointB||'Pendiente')}<br><strong>Regla B:</strong> ${esc(state.reunion.pointRule||'Pendiente')}</p><h2>Roles</h2><p>Coordinación: ${esc(personName(state.roles.coord))} · Comunicación: ${esc(personName(state.roles.comm))} · Kit: ${esc(personName(state.roles.kit))}</p><h2>Comunicación</h2><p>Principal: ${esc(state.communication.primary||'Pendiente')} · Alternativo: ${esc(state.communication.alt||'Pendiente')}<br>Sin comunicación: ${esc(noCommText())}<br>Contacto externo: ${esc(state.communication.externalName||'Pendiente')} ${esc(state.communication.externalPhone||'')}</p><h2>Kit</h2><p>${bs.ready}/${bs.required} elementos requeridos listos.</p><h2>Mapa lógico familiar</h2><div class="print-map">${familyMapSVG(false)}</div><h2>Revisión de coherencia</h2><ul>${coherence().map(x=>`<li><strong>${esc(x.title)}:</strong> ${esc(x.detail)}</li>`).join('')}</ul>${quick}${cards}`;
   if(mode==='quick') content=quick;
   if(mode==='cards') content=cards;
   $('#print').innerHTML=content+`<p style="font-size:8px;color:#64748b;margin-top:12px">Elaborado por David Linares Brea · info@movidasst.com · WhatsApp +56 9 6861 5650 · www.movidasst.com</p>`;
@@ -1356,14 +1538,15 @@ function printPlan(mode='full'){
 }
 
 function flowPrint(id){
-  const f=FLOW[id]||FLOW.otra, name=id==='otra'&&state.custom.threat?state.custom.threat:label('amenazas',id), act=THREAT_ACTIONS.find(x=>x[0]===state.threatPlans[id])?.[1]||'Seguir acuerdo familiar';
+  const f=FLOW[id]||FLOW.otra, name=threatName(id), act=THREAT_ACTIONS.find(x=>x[0]===assessmentFor(id).response)?.[1]||'Seguir acuerdo familiar';
   const steps=[['1 · Reconoce',f.signal],['2 · Protégete',f.protect],['3 · Actúa',act],['4 · Reúnete',`A: ${state.reunion.pointA||'Pendiente'} · B: ${state.reunion.pointBNA?'No aplica':state.reunion.pointB||'Pendiente'}`],['5 · Comunica',noCommText()]];
   return`<div class="flow-card"><h3>${esc(name)}</h3><div class="flow-grid">${steps.map(([a,b])=>`<div class="flow-step"><b>${esc(a)}</b>${esc(b)}</div>`).join('')}</div></div>`;
 }
 
 function walletCard(m){
   const primary=memberPlaces(m)[0]||'Pendiente';
-  return`<div class="wallet"><span class="eyebrow">MI PARTE DEL PLAN</span><h3>${esc(m.name)}</h3><p class="big">📍 ${esc(primary)}</p><ol>${memberPlaces(m).slice(0,3).map(p=>`<li><strong>Si estoy en ${esc(p)}:</strong> ${esc(sepText(m,p))}</li>`).join('')}</ol><p><strong>Punto A:</strong> ${esc(state.reunion.pointA||'Pendiente')}<br><strong>Punto B:</strong> ${esc(state.reunion.pointBNA?'No aplica':state.reunion.pointB||'Pendiente')}<br><strong>Contacto:</strong> ${esc(state.communication.externalName||'Pendiente')} ${esc(state.communication.externalPhone||'')}</p><p style="font-size:8px">Primero protégete y sigue las instrucciones oficiales o del lugar donde estés.</p></div>`;
+  const specific=state.threats.flatMap(t=>memberPlaces(m).map(p=>({threat:threatName(t),place:p,text:assessmentFor(t).memberPlaceActions?.[m.id]?.[p]||''}))).filter(x=>x.text);
+  return`<div class="wallet"><span class="eyebrow">MI PARTE DEL PLAN</span><h3>${esc(m.name)}</h3><p class="big">📍 ${esc(primary)}</p><ol>${memberPlaces(m).slice(0,3).map(p=>`<li><strong>Si estoy en ${esc(p)}:</strong> ${esc(sepText(m,p))}</li>`).join('')}</ol>${specific.length?`<p><strong>Ajustes por amenaza:</strong><br>${specific.map(x=>`${esc(x.threat)} · ${esc(x.place)}: ${esc(x.text)}`).join('<br>')}</p>`:''}<p><strong>Punto A:</strong> ${esc(state.reunion.pointA||'Pendiente')}<br><strong>Punto B:</strong> ${esc(state.reunion.pointBNA?'No aplica':state.reunion.pointB||'Pendiente')}<br><strong>Contacto:</strong> ${esc(state.communication.externalName||'Pendiente')} ${esc(state.communication.externalPhone||'')}</p><p style="font-size:8px">Primero protégete y sigue las instrucciones oficiales o del lugar donde estés.</p></div>`;
 }
 
 window.addEventListener('hashchange', safeRender);
