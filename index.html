@@ -1277,7 +1277,7 @@ function bind(){
   if(languageSelect){languageSelect.value=currentLang;languageSelect.onchange=e=>setLanguage(e.target.value)}
   $$('[data-action]').forEach(b=>{const a=b.dataset.action;b.onclick=e=>handleAction(a,e,b)});
   $$('[data-delmember]').forEach(b=>b.onclick=async()=>{const id=b.dataset.delmember,m=humans().find(x=>x.id===id);if(!m||!confirm(`¿Eliminar a “${m.name}” del plan? Se limpiarán sus roles y acuerdos activos.`))return;await saveVersion('Antes de eliminar integrante');state.members=state.members.filter(x=>x.id!==id);removePersonReferences(id);await saveState('Integrante eliminado',true,'Eliminar integrante');safeRender()});
-  $('[data-delpet]').forEach(b=>b.onclick=async()=>{
+  $$('[data-delpet]').forEach(b=>b.onclick=async()=>{
     const pet=state.pets.find(p=>p.id===b.dataset.delpet);if(!pet||!confirm(`¿Eliminar a “${pet.name}” del plan?`))return;
     await saveVersion('Antes de eliminar mascota');
     state.pets=state.pets.filter(p=>p.id!==b.dataset.delpet);
