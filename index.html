@@ -465,16 +465,7 @@ function trText(value){
   if(!core)return value;
   if(dict[core])return lead+dict[core]+tail;
   if(!TRANSLATION_MATCHERS[currentLang]){
-    const keys=Object.keys(dict).filter(Boolean).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\function trText(value){
-  if(currentLang==='es'||!value)return value;
-  const dict=UI_TRANSLATIONS[currentLang]||{}, lead=value.match(/^\s*/)?.[0]||'', tail=value.match(/\s*$/)?.[0]||'', core=value.trim();
-  if(!core)return value;
-  if(dict[core])return lead+dict[core]+tail;
-  let out=core;
-  const replacements=Object.entries(dict).sort((a,b)=>b[0].length-a[0].length);
-  for(const[from,to]of replacements) out=out.split(from).join(to);
-  return lead+out+tail;
-}'));
+    const keys=Object.keys(dict).filter(Boolean).sort((a,b)=>b.length-a.length).map(k=>k.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&'));
     TRANSLATION_MATCHERS[currentLang]=keys.length?new RegExp(keys.join('|'),'g'):null;
   }
   const matcher=TRANSLATION_MATCHERS[currentLang], out=matcher?core.replace(matcher,match=>dict[match]):core;
