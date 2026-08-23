@@ -519,6 +519,7 @@ const FALLBACK={
 
 const THREAT_ACTIONS=[['stay','Permanecer en lugar seguro'],['evacuate','Evacuar / desplazarse'],['official','Seguir instrucciones oficiales'],['mixed','Depende de las condiciones']];
 const SEP_ACTIONS=[['stay_place','Permanecer en el lugar hasta reunificación autorizada'],['point_a','Ir al Punto A si es seguro'],['point_b','Ir al Punto B si el Punto A no es accesible'],['protocol','Seguir protocolo del lugar y esperar retiro / reunificación'],['home','Regresar a casa solo si la ruta es segura'],['other','Otro acuerdo particular']];
+const EXPOSURE_ASSETS=[['home','Vivienda'],['pets','Mascotas'],['documents','Documentos esenciales'],['utilities','Servicios básicos'],['vehicle','Vehículo / medio de transporte']];
 const CORE_BAG=[['agua','Agua'],['alimentos','Alimentos no perecederos'],['linterna','Linterna'],['radio','Radio'],['energia','Baterías / power bank'],['botiquin','Botiquín'],['documentos','Copias de documentos'],['efectivo','Efectivo'],['llaves','Copias de llaves']];
 const NEED_BAG={meds:['medicamentos','Medicamentos personales'],wheelchair:['wheelchair_kit','Kit / repuestos de silla de ruedas'],walker:['mobility_aid','Repuesto para bastón/andador'],vision:['vision_aid','Ayudas de orientación / identificación'],hearing:['hearing_batt','Baterías / apoyo para audífonos'],cognitive:['comfort','Elementos de regulación / apoyo'],oxygen:['oxygen_supply','Reserva / accesorios de oxígeno'],electric:['medical_power','Energía de respaldo para equipo médico'],pregnancy:['pregnancy_supplies','Suministros específicos de embarazo'],child:['child_supplies','Suministros para niño/a pequeño/a'],elder:['elder_supplies','Suministros para adulto mayor']};
 
@@ -567,11 +568,13 @@ function cleanMemberPlaceActions(raw){
   }
   return out;
 }
-function blankAssessment(){return{vulns:[],caps:[],customVulns:[],customCaps:[],vulnsReviewed:false,capsReviewed:false,response:'',gaps:[],actions:[],memberPlaceActions:{},notes:''}}
+function blankAssessment(){return{exposure:{members:[],places:[],assets:[],frequency:'',level:'',notes:''},exposureReviewed:false,vulns:[],caps:[],customVulns:[],customCaps:[],vulnsReviewed:false,capsReviewed:false,response:'',gaps:[],actions:[],memberPlaceActions:{},notes:''}}
 function normalizeAssessment(raw={},legacy={}){
   const a=raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{}, b=blankAssessment();
   return{
     ...b,...a,
+    exposure:{members:cleanNames(a.exposure?.members),places:cleanNames(a.exposure?.places),assets:cleanIds(a.exposure?.assets),frequency:String(a.exposure?.frequency||''),level:String(a.exposure?.level||''),notes:String(a.exposure?.notes||'').trim()},
+    exposureReviewed:Boolean(a.exposureReviewed),
     vulns:cleanIds(a.vulns!==undefined?a.vulns:legacy.vulns).filter(x=>x!=='otro'),
     caps:cleanIds(a.caps!==undefined?a.caps:legacy.caps).filter(x=>x!=='otro'),
     customVulns:cleanNames(a.customVulns!==undefined?a.customVulns:legacy.customVulns),
@@ -794,7 +797,7 @@ function removePersonReferences(id){
   for(const key of Object.keys(state.roles))if(state.roles[key]===id)state.roles[key]='';
   delete state.support[id];delete state.separated[id];
   for(const m of humans()){if(m.pickup?.primary===id)m.pickup.primary='';if(m.pickup?.backup===id)m.pickup.backup='';const s=state.support[m.id];if(s?.primary===id)s.primary='';if(s?.backup===id)s.backup=''}
-  for(const a of Object.values(state.threatAssessments||{}))if(a?.memberPlaceActions)delete a.memberPlaceActions[id];
+  for(const a of Object.values(state.threatAssessments||{})){if(a?.memberPlaceActions)delete a.memberPlaceActions[id];if(a?.exposure?.members)a.exposure.members=a.exposure.members.filter(x=>x!==id)}
 }
 function personOptions(selected='',allowNA=false,exclude=''){
   let h=allowNA?'<option value="NA">No aplica</option>':'<option value="">Seleccionar integrante</option>';
@@ -851,7 +854,7 @@ function suggestedVulns(){
 function completeness(){
   const people=humans(),familyParts=[people.length>0,people.length>0&&!!state.planDate,people.length>0&&people.some(m=>m.isSelf),people.length>0&&people.every(m=>m.name),people.length>0&&people.every(m=>m.relation),people.length>0&&people.every(m=>m.place)];
   const family=Math.round(familyParts.filter(Boolean).length/familyParts.length*100);
-  const hasThreats=state.threats.length>0,activeAssessments=state.threats.map(assessmentFor),riskParts=[hasThreats,hasThreats&&activeAssessments.every(a=>a.vulnsReviewed),hasThreats&&activeAssessments.every(a=>a.capsReviewed),hasThreats&&activeAssessments.every(a=>a.response)];
+  const hasThreats=state.threats.length>0,activeAssessments=state.threats.map(assessmentFor),riskParts=[hasThreats,hasThreats&&activeAssessments.every(a=>a.exposureReviewed),hasThreats&&activeAssessments.every(a=>a.vulnsReviewed),hasThreats&&activeAssessments.every(a=>a.capsReviewed),hasThreats&&activeAssessments.every(a=>a.response)];
   const identify=Math.round(riskParts.filter(Boolean).length/riskParts.length*100);
   const reu=!!(state.reunion.pointA&&state.reunion.outsideZone&&(state.reunion.pointB||state.reunion.pointBNA)),sep=people.length>0&&people.every(m=>memberPlaces(m).every(p=>separatedForPlace(m,p)?.mode));
   const coreRoles=!!(state.roles.coord&&state.roles.comm&&state.roles.kit&&state.roles.utilities&&(!hasPets()||(state.roles.pets&&state.roles.pets!=='NA')));
@@ -888,6 +891,7 @@ function coherence(){
   if(!state.threats.length) add('critical','Amenazas sin identificar','Selecciona solo las amenazas pertinentes para tu contexto.','identify');
   else for(const t of state.threats){
     const a=assessmentFor(t), name=threatName(t);
+    if(!a.exposureReviewed) add('review',`Exposición pendiente: ${name}`,'Define quién o qué puede ser alcanzado por esta amenaza, dónde y con qué frecuencia.','identify');
     if(!a.vulnsReviewed) add('review',`Vulnerabilidades pendientes: ${name}`,'Evalúa las condiciones que pueden aumentar el impacto frente a esta amenaza.','identify');
     if(!a.capsReviewed) add('review',`Capacidades pendientes: ${name}`,'Evalúa los recursos, conocimientos y redes útiles frente a esta amenaza.','identify');
     if(!a.response) add('review',`Respuesta general pendiente: ${name}`,'Define si la familia permanece, evacua, sigue instrucción oficial o depende de condiciones.','identify');
@@ -1013,11 +1017,12 @@ function threatPlanFields(ids){
 }
 
 function riskAssessmentCard(id,index){
-  const a=assessmentFor(id), complete=a.vulnsReviewed&&a.capsReviewed&&!!a.response, sugs=suggestedVulns();
+  const a=assessmentFor(id), complete=a.exposureReviewed&&a.vulnsReviewed&&a.capsReviewed&&!!a.response, sugs=suggestedVulns(),allPlaces=[...new Set(humans().flatMap(memberPlaces))],ex=a.exposure||blankAssessment().exposure;
   const vulns=preservedPairs('vulnerabilidades',catPairs('vulnerabilidades'),a.vulns).filter(([x])=>x!=='otro');
   const caps=preservedPairs('capacidades',catPairs('capacidades'),a.caps).filter(([x])=>x!=='otro');
   const memberFields=humans().length?`<div class="risk-block"><h3>Ajustes por integrante y lugar</h3><p>Opcionales. Complementan el acuerdo general cuando esta amenaza requiere una indicación distinta.</p><div class="list">${humans().map((m,mi)=>`<div class="item"><strong>${esc(m.name)}</strong>${memberPlaces(m).map((p,pi)=>`<div class="field" style="margin-top:8px"><label>${esc(p)}</label><input name="ma_${index}_${mi}_${pi}" value="${esc(a.memberPlaceActions?.[m.id]?.[p]||'')}" placeholder="Ajuste específico para esta amenaza"></div>`).join('')}</div>`).join('')}</div></div>`:'';
   return`<details class="threat-eval" ${index===0||!complete?'open':''}><summary><span>${index+1} · ${esc(threatName(id))}</span><span class="tag ${complete?'green':'yellow'}">${complete?'Evaluación completa':'Evaluación pendiente'}</span></summary><div class="threat-eval-body">
+  <div class="risk-block"><h3>Exposición</h3><p><strong>Pregunta guía:</strong> si esta amenaza ocurre, ¿a quién o qué puede alcanzar y en qué lugares?</p><div class="context" style="margin-bottom:10px">La exposición no es una debilidad. Describe la presencia de personas, bienes o servicios en la zona y momento en que la amenaza puede afectarlos.</div><div class="field"><label>Personas expuestas</label><div class="chips">${humans().length?humans().map((m,mi)=>`<div class="chip"><input type="checkbox" id="em_${index}_${mi}" name="em_${index}" value="${esc(m.id)}" ${ex.members.includes(m.id)?'checked':''}><label for="em_${index}_${mi}">${esc(m.name)}</label></div>`).join(''):'<span class="hint">Agrega integrantes para seleccionarlos.</span>'}</div></div><div class="field"><label>Lugares expuestos</label><div class="chips">${allPlaces.length?allPlaces.map((p,pi)=>`<div class="chip"><input type="checkbox" id="ep_${index}_${pi}" name="ep_${index}" value="${esc(p)}" ${ex.places.includes(p)?'checked':''}><label for="ep_${index}_${pi}">${esc(p)}</label></div>`).join(''):'<span class="hint">Los lugares aparecerán al registrar integrantes.</span>'}</div></div><div class="field"><label>Bienes o recursos expuestos</label><div class="chips">${EXPOSURE_ASSETS.map(([v,n],ai)=>`<div class="chip"><input type="checkbox" id="ea_${index}_${ai}" name="ea_${index}" value="${v}" ${ex.assets.includes(v)?'checked':''}><label for="ea_${index}_${ai}">${n}</label></div>`).join('')}</div></div><div class="row"><div class="field"><label>Frecuencia de exposición</label><select name="ef_${index}"><option value="">Seleccionar</option><option value="permanent" ${ex.frequency==='permanent'?'selected':''}>Permanente / diaria</option><option value="frequent" ${ex.frequency==='frequent'?'selected':''}>Frecuente</option><option value="occasional" ${ex.frequency==='occasional'?'selected':''}>Ocasional</option><option value="rare" ${ex.frequency==='rare'?'selected':''}>Poco frecuente</option></select></div><div class="field"><label>Nivel de exposición estimado</label><select name="el_${index}"><option value="">Seleccionar</option><option value="high" ${ex.level==='high'?'selected':''}>Alto</option><option value="medium" ${ex.level==='medium'?'selected':''}>Medio</option><option value="low" ${ex.level==='low'?'selected':''}>Bajo</option></select></div></div><div class="field"><label>Observación sobre la exposición</label><textarea name="en_${index}" placeholder="Ej. dos integrantes permanecen durante el día en una zona inundable">${esc(ex.notes||'')}</textarea></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input name="ena_${index}" type="checkbox" ${a.exposureReviewed&&!ex.members.length&&!ex.places.length&&!ex.assets.length?'checked':''}> No identificamos exposición pertinente para esta amenaza</label></div>
   <div class="risk-block"><h3>Vulnerabilidades</h3><p>Condiciones que pueden aumentar el impacto frente a esta amenaza.</p>${sugs.length?`<div class="context" style="margin-bottom:10px"><strong>Sugerencias por lo que ya declaraste:</strong> ${sugs.map(x=>esc(label('vulnerabilidades',x))).join(' · ')}. Confirma únicamente las que correspondan a ${esc(threatName(id))}.</div>`:''}<div id="riskV_${index}">${catalogChecks('vulnerabilidades',vulns,a.vulns,`vl${index}_`,['otro'])}</div><div class="field" style="margin-top:10px"><label>Vulnerabilidades adicionales</label><textarea name="cv_${index}" placeholder="Una por línea.">${esc((a.customVulns||[]).join('\n'))}</textarea></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input name="vna_${index}" type="checkbox" ${a.vulnsReviewed&&!a.vulns.length&&!a.customVulns.length?'checked':''}> No identificamos vulnerabilidades para esta amenaza / No aplica</label></div>
   <div class="risk-block"><h3>Capacidades</h3><p>Recursos, conocimientos y redes útiles frente a esta amenaza.</p><div id="riskC_${index}">${catalogChecks('capacidades',caps,a.caps,`cp${index}_`,['otro'])}</div><div class="field" style="margin-top:10px"><label>Capacidades adicionales</label><textarea name="cc_${index}" placeholder="Una por línea.">${esc((a.customCaps||[]).join('\n'))}</textarea></div><label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input name="cna_${index}" type="checkbox" ${a.capsReviewed&&!a.caps.length&&!a.customCaps.length?'checked':''}> Aún no identificamos capacidades para esta amenaza</label></div>
   <div class="risk-block"><div class="field"><label>Respuesta general</label><select name="tp_${index}"><option value="">Seleccionar respuesta</option>${THREAT_ACTIONS.map(([v,n])=>`<option value="${v}" ${a.response===v?'selected':''}>${n}</option>`).join('')}</select></div><div class="field"><label>Brechas o mejoras prioritarias</label><textarea name="gap_${index}" placeholder="Una por línea.">${esc((a.gaps||[]).join('\n'))}</textarea></div><div class="field"><label>Acciones de preparación específicas</label><textarea name="act_${index}" placeholder="Una por línea.">${esc((a.actions||[]).join('\n'))}</textarea></div></div>${memberFields}<div class="risk-block"><div class="field"><label>Observaciones</label><textarea name="note_${index}" placeholder="Opcional">${esc(a.notes||'')}</textarea></div></div>
@@ -1093,6 +1098,7 @@ function simulationResult(threat,profile,noData){
   if(noData&&!state.communication.noComm) gaps.push('No existe una regla para actuar sin comunicación');
   if(!state.reunion.pointA) gaps.push('No está definido el Punto A');
   if(allNeeds().includes('meds')&&state.bag.medicamentos?.status!=='ready') gaps.push('Medicamentos requeridos no figuran listos');
+  if(!assessment.exposureReviewed) gaps.push(`Falta evaluar exposición frente a ${threatName(threat)}`);
   if(!assessment.vulnsReviewed) gaps.push(`Falta evaluar vulnerabilidades frente a ${threatName(threat)}`);
   if(!assessment.capsReviewed) gaps.push(`Falta evaluar capacidades frente a ${threatName(threat)}`);
   if(!assessment.response) gaps.push(`Falta definir la respuesta general frente a ${threatName(threat)}`);
@@ -1354,7 +1360,7 @@ function captureRiskForm(f){
   if(!f)return[];
   const fd=new FormData(f), pending=[];
   state.threats.forEach((t,i)=>{
-    const vulns=$$(`#riskV_${i} input:checked`,f).map(x=>x.value), caps=$$(`#riskC_${i} input:checked`,f).map(x=>x.value);
+    const vulns=$$(`#riskV_${i} input:checked`,f).map(x=>x.value), caps=$$(`#riskC_${i} input:checked`,f).map(x=>x.value),expMembers=fd.getAll(`em_${i}`).map(String),expPlaces=fd.getAll(`ep_${i}`).map(String),expAssets=fd.getAll(`ea_${i}`).map(String),expFrequency=String(fd.get(`ef_${i}`)||''),expLevel=String(fd.get(`el_${i}`)||''),expNone=!!fd.get(`ena_${i}`);
     const customVulns=splitLines(fd.get(`cv_${i}`)), customCaps=splitLines(fd.get(`cc_${i}`));
     const memberPlaceActions={};
     humans().forEach((m,mi)=>{
@@ -1365,7 +1371,9 @@ function captureRiskForm(f){
     const vulnsReviewed=!!fd.get(`vna_${i}`)||vulns.length>0||customVulns.length>0;
     const capsReviewed=!!fd.get(`cna_${i}`)||caps.length>0||customCaps.length>0;
     const response=String(fd.get(`tp_${i}`)||'');
-    state.threatAssessments[t]=normalizeAssessment({vulns,caps,customVulns,customCaps,vulnsReviewed,capsReviewed,response,gaps:splitLines(fd.get(`gap_${i}`)),actions:splitLines(fd.get(`act_${i}`)),memberPlaceActions,notes:String(fd.get(`note_${i}`)||'').trim()});
+    const exposureReviewed=expNone||((expMembers.length||expPlaces.length||expAssets.length)&&expFrequency&&expLevel);
+    state.threatAssessments[t]=normalizeAssessment({exposure:{members:expMembers,places:expPlaces,assets:expAssets,frequency:expFrequency,level:expLevel,notes:String(fd.get(`en_${i}`)||'').trim()},exposureReviewed,vulns,caps,customVulns,customCaps,vulnsReviewed,capsReviewed,response,gaps:splitLines(fd.get(`gap_${i}`)),actions:splitLines(fd.get(`act_${i}`)),memberPlaceActions,notes:String(fd.get(`note_${i}`)||'').trim()});
+    if(!exposureReviewed)pending.push(`exposición de ${threatName(t)}`);
     if(!vulnsReviewed)pending.push(`vulnerabilidades de ${threatName(t)}`);
     if(!capsReviewed)pending.push(`capacidades de ${threatName(t)}`);
     if(!response)pending.push(`respuesta de ${threatName(t)}`);
@@ -1586,7 +1594,8 @@ function printPlan(mode='full'){
   const riskDetails=state.threats.map(t=>{
     const a=assessmentFor(t),vs=[...a.vulns.map(v=>label('vulnerabilidades',v)),...a.customVulns],cs=[...a.caps.map(c=>label('capacidades',c)),...a.customCaps],response=THREAT_ACTIONS.find(x=>x[0]===a.response)?.[1]||'Pendiente';
     const memberSpecific=humans().flatMap(m=>memberPlaces(m).map(p=>({member:m.name,place:p,text:a.memberPlaceActions?.[m.id]?.[p]||''}))).filter(x=>x.text);
-    return`<h3>${esc(threatName(t))}</h3><table><tr><th>Vulnerabilidades</th><td>${esc(vs.join(' · ')||(a.vulnsReviewed?'No identificadas / No aplica':'Pendiente'))}</td></tr><tr><th>Capacidades</th><td>${esc(cs.join(' · ')||(a.capsReviewed?'No identificadas':'Pendiente'))}</td></tr><tr><th>Respuesta general</th><td>${esc(response)}</td></tr><tr><th>Brechas</th><td>${esc(a.gaps.join(' · ')||'No registradas')}</td></tr><tr><th>Acciones específicas</th><td>${esc(a.actions.join(' · ')||'No registradas')}</td></tr>${memberSpecific.length?`<tr><th>Ajustes por integrante y lugar</th><td>${memberSpecific.map(x=>`<strong>${esc(x.member)} · ${esc(x.place)}:</strong> ${esc(x.text)}`).join('<br>')}</td></tr>`:''}${a.notes?`<tr><th>Observaciones</th><td>${esc(a.notes)}</td></tr>`:''}</table>`;
+    const exposedMembers=(a.exposure?.members||[]).map(personName),exposedAssets=(a.exposure?.assets||[]).map(id=>EXPOSURE_ASSETS.find(x=>x[0]===id)?.[1]||id);
+    return`<h3>${esc(threatName(t))}</h3><table><tr><th>Exposición</th><td>${esc([exposedMembers.join(', '),(a.exposure?.places||[]).join(', '),exposedAssets.join(', '),a.exposure?.frequency,a.exposure?.level].filter(Boolean).join(' · ')||(a.exposureReviewed?'No identificada / No aplica':'Pendiente'))}</td></tr><tr><th>Vulnerabilidades</th><td>${esc(vs.join(' · ')||(a.vulnsReviewed?'No identificadas / No aplica':'Pendiente'))}</td></tr><tr><th>Capacidades</th><td>${esc(cs.join(' · ')||(a.capsReviewed?'No identificadas':'Pendiente'))}</td></tr><tr><th>Respuesta general</th><td>${esc(response)}</td></tr><tr><th>Brechas</th><td>${esc(a.gaps.join(' · ')||'No registradas')}</td></tr><tr><th>Acciones específicas</th><td>${esc(a.actions.join(' · ')||'No registradas')}</td></tr>${memberSpecific.length?`<tr><th>Ajustes por integrante y lugar</th><td>${memberSpecific.map(x=>`<strong>${esc(x.member)} · ${esc(x.place)}:</strong> ${esc(x.text)}`).join('<br>')}</td></tr>`:''}${a.notes?`<tr><th>Observaciones</th><td>${esc(a.notes)}</td></tr>`:''}</table>`;
   }).join('');
   const quick=`<section class="quick-page"><div class="brand-print"><strong>La Movida SST Plus · Plan rápido</strong><span>De la Reacción a la Prevención</span></div><h1>Flujos de acción por escenario</h1><p>Reconocer → protegerse → ejecutar el acuerdo → reunirse → comunicar. Las instrucciones oficiales prevalecen.</p>${flows}<h2>Qué hace cada integrante si estamos separados</h2>${humans().map(m=>`<h3>${esc(m.name)}</h3><ul>${memberPlaces(m).map(p=>`<li><strong>${esc(p)}:</strong> ${esc(sepText(m,p))}</li>`).join('')}</ul>`).join('')}</section>`;
   const cards=`<section class="wallet-page"><div class="brand-print"><strong>Tarjetas individuales</strong><span>La Movida SST Plus</span></div><div class="wallet-grid">${humans().map(walletCard).join('')}</div></section>`;
