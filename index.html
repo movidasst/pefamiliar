@@ -969,7 +969,7 @@ function hIcon(name){return I[name]||''}
 function navHtml(){
   const items=[['home','Inicio'],['family','Familia'],['plan','Mi plan'],['practice','Practicar'],['more','Recursos']];
   const activeRoute=route==='member'?'family':['simulation'].includes(route)?'practice':['tutorial','versions','more'].includes(route)?'more':['identify','reunion','roles','communication','homeprep','bag','map','plan'].includes(route)?'plan':route;
-  $('.nav button').forEach((b,i)=>{
+  $$('.nav button').forEach((b,i)=>{
     const [r,n]=items[i];
     b.innerHTML=hIcon(r)+`<span>${n}</span>`;
     b.classList.toggle('active',activeRoute===r);
