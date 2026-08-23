@@ -385,7 +385,7 @@ body.donation-open { overflow: hidden; }
 <button data-nav="family" aria-label="Familia"></button>
 <button data-nav="plan" aria-label="Mi plan"></button>
 <button data-nav="practice" aria-label="Practicar"></button>
-<button data-nav="more" aria-label="Más"></button>
+<button data-nav="more" aria-label="Recursos"></button>
 </nav>
 <!-- DONATION MODAL: independiente del estado y del overlay de la aplicación -->
 <div id="donationModal" class="donation-modal" hidden aria-hidden="true"></div>
@@ -398,12 +398,12 @@ body.donation-open { overflow: hidden; }
 (()=>{'use strict';
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)], esc=(v='')=>String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
-const VERSION='5.2.0';
+const VERSION='5.3.0';
 const KEY='pefamiliar_v5_state', OLD_KEYS=['pefamiliar_v4_state','pefamiliar_v3_progressive','movida_plan_familiar_v2','movida_plan_familiar_v1'];
 const LANG_KEY='pefamiliar_language', SUPPORTED_LANGS=['es','en','pt','fr'];
 let currentLang=(()=>{try{const saved=localStorage.getItem(LANG_KEY);if(SUPPORTED_LANGS.includes(saved))return saved}catch{} const browser=(navigator.language||'es').slice(0,2).toLowerCase();return SUPPORTED_LANGS.includes(browser)?browser:'es'})();
 const DB_NAME='pefamiliar_v4_db', DB_VERSION=1, CATALOG_KEY='pef_catalog_cache_v2';
-let formDirty=false;
+let formDirty=false, lastSafeHash=location.hash||'#home', suppressHashGuard=false;
 function isoToday(value=new Date()){const d=value instanceof Date?value:new Date(value);return Number.isNaN(d.getTime())?new Date().toISOString().slice(0,10):d.toISOString().slice(0,10)}
 function currentLocale(){return{es:'es-ES',en:'en-US',pt:'pt-BR',fr:'fr-FR'}[currentLang]||'es-ES'}
 function formatDate(value,withTime=false){const raw=String(value||''),m=raw.match(/^(\d{4})-(\d{2})-(\d{2})$/),d=m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12):new Date(value);if(Number.isNaN(d.getTime()))return'—';return withTime?d.toLocaleString(currentLocale()):d.toLocaleDateString(currentLocale())}
@@ -552,7 +552,13 @@ const HELP={
  communication:{title:'Comunicación resiliente',body:'Combina un medio principal, una alternativa y una regla que funcione sin señal. El contacto fuera de la zona es un respaldo.',why:'Una llamada puede fallar; un acuerdo previo sigue funcionando.'},
  bag:{title:'Preparar lo que realmente aplica',body:'El kit base se adapta automáticamente a medicamentos, ayudas técnicas, mascotas y otras necesidades registradas.',why:'Un kit genérico puede olvidar lo esencial para una persona concreta.'},
  practice:{title:'Practicar y mejorar',body:'La simulación usa los lugares, roles y acuerdos de tu propia familia para descubrir brechas antes de una emergencia real.',why:'Un plan no se valida por estar escrito, sino por poder ejecutarse.'},
- more:{title:'Recursos del plan',body:'Aquí encuentras el tutorial, los documentos imprimibles, respaldos, versiones, accesibilidad e información de la aplicación.',why:'Agrupar estas herramientas permite encontrarlas sin confundirlas con las etapas principales del plan.'}
+ more:{title:'Recursos del plan',body:'Aquí encuentras el tutorial, los documentos imprimibles, respaldos, versiones, accesibilidad e información de la aplicación.',why:'Agrupar estas herramientas permite encontrarlas sin confundirlas con las etapas principales del plan.'},
+ plan:{title:'Revisar el plan completo',body:'Aquí ves la progresión de las cinco etapas y las alertas de coherencia que todavía requieren una decisión.',why:'Un porcentaje aislado no basta: las relaciones entre personas, lugares, apoyos y acciones deben poder ejecutarse.'},
+ homeprep:{title:'Preparar la vivienda',body:'Registra salidas, zona segura y cómo cortar o declarar no aplicables los servicios críticos.',why:'Estas decisiones reducen improvisaciones y permiten detectar brechas antes de una emergencia.'},
+ simulation:{title:'Simular el plan',body:'Prueba un escenario con los integrantes, lugares y acuerdos reales del plan.',why:'La simulación revela decisiones faltantes sin esperar a una emergencia real.'},
+ map:{title:'Mapa lógico familiar',body:'Visualiza cómo se relacionan integrantes, lugares frecuentes y puntos de reunión.',why:'Una vista conjunta permite detectar personas o lugares sin acuerdos.'},
+ member:{title:'Datos del integrante',body:'Identifica a la persona que elabora el plan, su relación, lugares frecuentes, necesidades y acuerdos de retiro.',why:'Distinguir “soy yo” de parentescos como padre o madre elimina ambigüedades.'},
+ versions:{title:'Historial de versiones',body:'Consulta y restaura puntos anteriores del plan guardados en este dispositivo.',why:'Las versiones permiten corregir cambios accidentales sin perder todo el trabajo.'}
 };
 
 const FLOW={
@@ -941,7 +947,9 @@ function planStatus(){
 function routeTo(r,arg='',force=false){
   if(formDirty&&!force&&!confirm('Hay cambios sin guardar. ¿Deseas salir de esta pantalla y descartarlos?'))return;
   formDirty=false;
-  location.hash='#'+r+(arg?':'+encodeURIComponent(arg):'');
+  const next='#'+r+(arg?':'+encodeURIComponent(arg):'');
+  lastSafeHash=next;
+  location.hash=next;
 }
 function parseRoute(){const h=(location.hash||'#home').slice(1),p=h.split(':');route=p[0]||'home';routeArg=p.length>1?decodeURIComponent(p.slice(1).join(':')):'';}
 function toast(t){$('#live').textContent=t;const old=$('.toast');if(old)old.remove();const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2300)}
@@ -949,11 +957,14 @@ function hIcon(name){return I[name]||''}
 
 function navHtml(){
   const items=[['home','Inicio'],['family','Familia'],['plan','Mi plan'],['practice','Practicar'],['more','Recursos']];
-  $$('.nav button').forEach((b,i)=>{
+  const activeRoute=route==='member'?'family':['simulation'].includes(route)?'practice':['tutorial','versions','more'].includes(route)?'more':['identify','reunion','roles','communication','homeprep','bag','map','plan'].includes(route)?'plan':route;
+  $('.nav button').forEach((b,i)=>{
     const [r,n]=items[i];
     b.innerHTML=hIcon(r)+`<span>${n}</span>`;
-    b.classList.toggle('active',route===r||(r==='plan'&&['identify','reunion','roles','communication','homeprep','bag','map'].includes(route)));
+    b.classList.toggle('active',activeRoute===r);
     b.setAttribute('aria-current',b.classList.contains('active')?'page':'false');
+    b.setAttribute('aria-label',n);
+    b.setAttribute('title',n);
   });
 }
 
@@ -1182,8 +1193,13 @@ function quickPage(){
 
 function noCommText(){if(!state.communication.noComm)return'Pendiente'; return state.communication.noComm+(state.communication.noCommOther?' · '+state.communication.noCommOther:'')}
 
+function closeOverlay(){
+  if(formDirty&&$('#overlay input, #overlay select, #overlay textarea')&&!confirm('Hay cambios sin guardar en esta ventana. ¿Deseas cerrarla y descartarlos?'))return false;
+  $('#overlay').innerHTML='';formDirty=false;return true;
+}
+
 function helpOverlay(){
-  const h=HELP[route]||HELP.plan;
+  const h=HELP[route]||HELP.plan||HELP.home;
   $('#overlay').innerHTML=`<div style="position:fixed;z-index:120;inset:0;background:rgba(1,17,38,.55);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center" data-action="closeOverlay"><section class="card" style="width:min(720px,100%);border-radius:28px 28px 0 0;padding:22px;max-height:78vh;overflow:auto" onclick="event.stopPropagation()"><div class="section-title"><div><span class="eyebrow">Ayuda contextual</span><h2 style="margin-top:8px">${esc(h.title)}</h2></div><button class="iconbtn" data-action="closeOverlay" aria-label="Cerrar ayuda">✕</button></div><p style="color:var(--muted)">${esc(h.body)}</p><div class="context"><strong>¿Por qué importa?</strong><br>${esc(h.why)}</div><div class="section"><small class="hint">Principios de diseño: lenguaje sencillo, reutilización de datos, ayuda consistente, navegación predecible y controles táctiles amplios.</small></div></section></div>`;
   bind();
   localize($('#overlay'));
@@ -1250,7 +1266,9 @@ function bind(){
   if(languageSelect){languageSelect.value=currentLang;languageSelect.onchange=e=>setLanguage(e.target.value)}
   $$('[data-action]').forEach(b=>{const a=b.dataset.action;b.onclick=e=>handleAction(a,e,b)});
   $$('[data-delmember]').forEach(b=>b.onclick=async()=>{const id=b.dataset.delmember,m=humans().find(x=>x.id===id);if(!m||!confirm(`¿Eliminar a “${m.name}” del plan? Se limpiarán sus roles y acuerdos activos.`))return;state.members=state.members.filter(x=>x.id!==id);removePersonReferences(id);await saveState('Integrante eliminado',true,'Eliminar integrante');safeRender()});
-  $$('[data-delpet]').forEach(b=>b.onclick=async()=>{
+  $('[data-delpet]').forEach(b=>b.onclick=async()=>{
+    const pet=state.pets.find(p=>p.id===b.dataset.delpet);if(!pet||!confirm(`¿Eliminar a “${pet.name}” del plan?`))return;
+    await saveVersion('Antes de eliminar mascota');
     state.pets=state.pets.filter(p=>p.id!==b.dataset.delpet);
     if(!state.pets.length) state.roles.pets='NA';
     await saveState('Mascota eliminada',true,'Actualizar familia');
@@ -1549,7 +1567,7 @@ async function handleAction(a,e,b){
     safeRender();
   }else if(a==='addPet') addPetOverlay();
   else if(a==='newDrill') drillOverlay();
-  else if(a==='closeOverlay'){ $('#overlay').innerHTML=''; }
+  else if(a==='closeOverlay'){ closeOverlay(); }
   else if(a==='closeQuick') routeTo('home');
   else if(a==='runSimulation'){
     const t=$('#simThreat').value, p=$('#simProfile').value, n=$('#simNoData').checked, res=simulationResult(t,p,n);
@@ -1646,13 +1664,20 @@ function walletCard(m){
   return`<div class="wallet"><span class="eyebrow">MI PARTE DEL PLAN</span><h3>${esc(m.name)}${m.isSelf?' · SOY YO':''}</h3><p class="big">📍 ${esc(primary)}</p><ol>${memberPlaces(m).slice(0,3).map(p=>`<li><strong>Si estoy en ${esc(p)}:</strong> ${esc(sepText(m,p))}</li>`).join('')}</ol>${specific.length?`<p><strong>Ajustes por amenaza:</strong><br>${specific.map(x=>`${esc(x.threat)} · ${esc(x.place)}: ${esc(x.text)}`).join('<br>')}</p>`:''}<p><strong>Punto A:</strong> ${esc(state.reunion.pointA||'Pendiente')}<br><strong>Punto B:</strong> ${esc(state.reunion.pointBNA?'No aplica':state.reunion.pointB||'Pendiente')}<br><strong>Contacto:</strong> ${esc(state.communication.externalName||'Pendiente')} ${esc(state.communication.externalPhone||'')}</p><p style="font-size:8px">Primero protégete y sigue las instrucciones oficiales o del lugar donde estés.</p></div>`;
 }
 
-window.addEventListener('hashchange', safeRender);
+window.addEventListener('hashchange',()=>{
+  const next=location.hash||'#home';
+  if(suppressHashGuard){suppressHashGuard=false;lastSafeHash=next;safeRender();return}
+  if(formDirty&&!confirm('Hay cambios sin guardar. ¿Deseas salir de esta pantalla y descartarlos?')){
+    suppressHashGuard=true;location.hash=lastSafeHash;return;
+  }
+  formDirty=false;lastSafeHash=next;safeRender();
+});
 window.addEventListener('beforeunload',e=>{if(formDirty){e.preventDefault();e.returnValue=''}});
 window.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
     if($('#overlay').innerHTML.trim()){
       if(route==='quick') routeTo('home');
-      else $('#overlay').innerHTML='';
+      else closeOverlay();
     }
   }
 });
