@@ -1,0 +1,23 @@
+# Plan Familiar de Emergencia · La Movida de SST Plus
+
+> Aplicación web gratuita y multilingüe para que familias de Venezuela y Latinoamérica construyan, guarden, practiquen e impriman su Plan Familiar de Emergencia.
+
+URL canónica: https://pefamiliar.movidasst.com/
+Autor: David Linares Brea
+Organización: La Movida de SST Plus
+Contacto: info@movidasst.com
+Idiomas: español, inglés, portugués y francés
+
+## Propósito
+
+La herramienta guía cinco etapas: conocer a la familia; identificar amenazas, exposición, vulnerabilidades y capacidades; acordar reunificación, roles y comunicación; preparar vivienda, documentos, kit y mochila de 72 horas; y practicar escenarios para mejorar el plan.
+
+## Privacidad y alcance
+
+Los datos personales y acuerdos del plan se guardan en el dispositivo del usuario. La aplicación es educativa y las instrucciones de las autoridades y responsables del lugar prevalecen durante una emergencia.
+
+## Recursos relacionados
+
+- Sitio principal: https://www.movidasst.com/
+- Curso gratuito: https://movidasst.org/course/info.php?id=85
+- Canal de WhatsApp: https://whatsapp.com/channel/0029Va0mlH5Jf05mrcCz8r3e
