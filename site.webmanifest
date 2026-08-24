@@ -1,0 +1,19 @@
+{
+  "name": "Plan Familiar de Emergencia · La Movida SST Plus",
+  "short_name": "Plan Familiar",
+  "description": "Herramienta gratuita para crear, guardar, practicar e imprimir un plan familiar de emergencia.",
+  "lang": "es-VE",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#007b85",
+  "icons": [
+    {
+      "src": "/logo-movida-sst-plus.png",
+      "sizes": "600x600",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
